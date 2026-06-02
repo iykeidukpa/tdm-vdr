@@ -21,6 +21,7 @@
                         brandSlate: '#1E293B',
                         brandBlue: '#3B82F6',
                         brandIndigo: '#6366F1',
+                        brandPurple: '#A855F7',
                         brandEmerald: '#10B981',
                         brandOrange: '#F97316',
                         brandRed: '#EF4444',
@@ -58,6 +59,10 @@
             0%, 100% { border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 0 0 0px rgba(249, 115, 22, 0.4); }
             50% { border-color: rgba(249, 115, 22, 1); box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.2); }
         }
+        @keyframes pulse-purple {
+            0%, 100% { border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 0 0 0px rgba(168, 85, 247, 0.4); }
+            50% { border-color: rgba(168, 85, 247, 1); box-shadow: 0 0 12px 4px rgba(168, 85, 247, 0.2); }
+        }
         @keyframes pulse-emerald {
             0%, 100% { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.4); }
             50% { border-color: rgba(16, 185, 129, 1); box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); }
@@ -68,27 +73,9 @@
         }
         .active-blue { animation: pulse-blue 2s infinite; border-width: 2px !important; background-color: rgba(59, 130, 246, 0.08) !important; }
         .active-orange { animation: pulse-orange 2s infinite; border-width: 2px !important; background-color: rgba(249, 115, 22, 0.08) !important; }
+        .active-purple { animation: pulse-purple 2s infinite; border-width: 2px !important; background-color: rgba(168, 85, 247, 0.08) !important; }
         .active-emerald { animation: pulse-emerald 2s infinite; border-width: 2px !important; background-color: rgba(16, 185, 129, 0.08) !important; }
         .active-red { animation: pulse-red 2s infinite; border-width: 2px !important; background-color: rgba(239, 68, 68, 0.08) !important; }
-        
-        /* Flowchart connector properties */
-        .connector-line {
-            stroke: #334155;
-            stroke-width: 2;
-            fill: none;
-            transition: stroke 0.3s ease;
-        }
-        .connector-active {
-            stroke: #6366F1;
-            stroke-width: 3;
-            stroke-dasharray: 6;
-            animation: dash 1s linear infinite;
-        }
-        @keyframes dash {
-            to {
-                stroke-dashoffset: -12;
-            }
-        }
     </style>
 </head>
 <body class="selection:bg-brandBlue selection:text-white">
@@ -143,7 +130,7 @@
                     <h3 class="text-2xl font-bold text-white flex items-center gap-2">
                         <span>🎮</span> Interactive Architectural Simulator
                     </h3>
-                    <p class="text-sm text-slate-400">Referencing "image_8f84d3.png" — Run programmatic events and watch the state transitions execute.</p>
+                    <p class="text-sm text-slate-400">Referencing "image_8f84d3.png" — Run programmatic events, config limits, and trigger live cooling-period disputes or rejection reconciliations.</p>
                 </div>
                 <button id="reset-button" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-4 py-2 rounded-xl text-sm font-medium border border-slate-700 transition duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -164,24 +151,25 @@
                         
                         <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
                             <span class="text-xs font-mono text-slate-400">VISUAL STATE INTERCONNECTS</span>
-                            <div class="flex items-center space-x-4 text-xs">
+                            <div class="flex flex-wrap items-center gap-3 text-xs">
                                 <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandBlue inline-block animate-pulse"></span> Active</span>
-                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandOrange inline-block"></span> Triage/Awaiting</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandPurple inline-block animate-pulse"></span> Reconciling</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandOrange inline-block animate-pulse"></span> Cooling Window</span>
                                 <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandEmerald inline-block"></span> Terminal State</span>
                             </div>
                         </div>
 
                         <!-- Canvas Diagram Container -->
-                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center justify-center py-6 relative">
+                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center justify-center py-6 relative">
                             
                             <!-- STATE 1: INITIALIZATION -->
-                            <div id="state-INITIALIZATION" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <div id="state-INITIALIZATION" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">STATE 01</span>
                                     <span class="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">INITIAL</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">INITIALIZATION</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">Open Banking authorization layer holds contract handshake.</p>
+                                <h4 class="font-bold text-xs text-white mt-2">INITIALIZATION</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">Open Banking authorization handshake layer.</p>
                                 <div class="mt-2 text-[10px] font-semibold text-brandBlue flex items-center justify-between">
                                     <span>Locked Funds</span>
                                     <span id="state-val-01">$0.00</span>
@@ -189,66 +177,83 @@
                             </div>
 
                             <!-- STATE 2: PRE-FULFILLMENT -->
-                            <div id="state-PRE-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <div id="state-PRE-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">STATE 02</span>
-                                    <span id="timer-badge-delivery" class="text-[10px] bg-brandOrange/20 text-brandOrange border border-brandOrange/30 px-1.5 py-0.5 rounded font-mono hidden">TR_DELIVERY</span>
+                                    <span id="timer-badge-delivery" class="text-[10px] bg-brandOrange/20 text-brandOrange border border-brandOrange/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_DELIVERY</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">PRE-FULFILLMENT</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">Buyer has authorized funds. Delivery Timer starts.</p>
+                                <h4 class="font-bold text-xs text-white mt-2">PRE-FULFILLMENT</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">Authorized deposit. Delivery Timer active.</p>
                                 <div class="mt-2 text-xs flex items-center justify-between">
-                                    <span class="text-[10px] text-slate-500">Timer Remainder</span>
-                                    <span id="countdown-delivery" class="font-mono text-brandOrange font-bold">-</span>
+                                    <span class="text-[10px] text-slate-500">Delivery Timer</span>
+                                    <span id="countdown-delivery" class="font-mono text-brandOrange font-bold text-xs">-</span>
                                 </div>
                             </div>
 
                             <!-- STATE 3: POST-FULFILLMENT -->
-                            <div id="state-POST-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <div id="state-POST-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">STATE 03</span>
-                                    <span id="timer-badge-inspection" class="text-[10px] bg-brandBlue/20 text-brandBlue border border-brandBlue/30 px-1.5 py-0.5 rounded font-mono hidden">TR_INSPECTION</span>
+                                    <span id="timer-badge-inspection" class="text-[10px] bg-brandBlue/20 text-brandBlue border border-brandBlue/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_INSPECTION</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">POST-FULFILLMENT</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">Fulfillment verified. Inspection & Rejection engines active.</p>
+                                <h4 class="font-bold text-xs text-white mt-2">POST-FULFILLMENT</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">Handed over. Inspection systems engaged.</p>
                                 <div class="mt-2 text-xs flex items-center justify-between">
-                                    <span class="text-[10px] text-slate-500">Inspection Time</span>
-                                    <span id="countdown-inspection" class="font-mono text-brandBlue font-bold">-</span>
+                                    <span class="text-[10px] text-slate-500">Inspection Timer</span>
+                                    <span id="countdown-inspection" class="font-mono text-brandBlue font-bold text-xs">-</span>
                                 </div>
                             </div>
 
-                            <!-- STATE 4: DISPUTE TRIAGE -->
-                            <div id="state-DISPUTE-TRIAGE" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <!-- STATE 4: REJECTION RECONCILIATION -->
+                            <div id="state-REJECTION-RECONCILIATION" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">STATE 04</span>
+                                    <span id="timer-badge-rejection" class="text-[10px] bg-brandPurple/20 text-brandPurple border border-brandPurple/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_REJECTION</span>
+                                </div>
+                                <h4 class="font-bold text-xs text-white mt-2">RECONCILIATION</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">Cargo rejected. Resolving issues under timer limits.</p>
+                                <div class="mt-2 text-xs flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-500">Reconcile Timer</span>
+                                    <span id="countdown-rejection" class="font-mono text-brandPurple font-bold text-xs">-</span>
+                                </div>
+                            </div>
+
+                            <!-- STATE 5: DISPUTE TRIAGE -->
+                            <div id="state-DISPUTE-TRIAGE" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">STATE 05</span>
-                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono">TR_REJECTION</span>
+                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono font-semibold">TRIAGE</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">DISPUTE TRIAGE</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">Escalated logic path. Frozen ledger split or arbitration loop.</p>
+                                <h4 class="font-bold text-xs text-white mt-2">DISPUTE TRIAGE</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">Unresolved issues. Ledger frozen for arbitration.</p>
                                 <div class="mt-2 text-xs flex items-center justify-between">
-                                    <span id="triage-badge" class="text-[10px] text-brandRed font-semibold uppercase">Green Zone Active</span>
+                                    <span id="triage-badge" class="text-[9px] text-brandRed font-semibold uppercase">Dispute Isolated</span>
                                 </div>
                             </div>
 
-                            <!-- STATE 5: AUTO-CANCELLED (TERMINAL) -->
-                            <div id="state-AUTO-CANCELLED" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <!-- STATE 6: AUTO-CANCELLED (TERMINAL) -->
+                            <div id="state-AUTO-CANCELLED" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">TERMINAL</span>
-                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono">CANCELLED</span>
+                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono font-semibold">CANCELLED</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">AUTO-CANCELLED</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">100% fund reversion triggered. Ledger clean-close payload dispatched.</p>
-                                <div class="mt-2 text-[10px] text-slate-500">Code: EXPIRED_DELIVERY</div>
+                                <h4 class="font-bold text-xs text-white mt-2">AUTO-CANCELLED</h4>
+                                <p class="text-[10px] text-slate-400 mt-1">100% buyer refund executed safely.</p>
+                                <div class="mt-2 text-[9px] text-slate-500">Code: TERM_REVERTED</div>
                             </div>
 
-                            <!-- STATE 6: SETTLED (TERMINAL) -->
-                            <div id="state-SETTLED" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                            <!-- STATE 7: SETTLED (TERMINAL / COOLING) -->
+                            <div id="state-SETTLED" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300 col-span-1 md:col-span-2">
                                 <div class="flex justify-between items-start">
-                                    <span class="text-[10px] font-mono text-slate-500">TERMINAL</span>
-                                    <span class="text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono">SETTLED</span>
+                                    <span class="text-[10px] font-mono text-slate-500">SETTLEMENT</span>
+                                    <span id="settled-badge" class="text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold">SETTLED</span>
                                 </div>
-                                <h4 class="font-bold text-sm text-white mt-2">SETTLED</h4>
-                                <p class="text-[11px] text-slate-400 mt-1">API payload clears transaction to verified partner bank rails.</p>
-                                <div class="mt-2 text-[10px] text-brandEmerald font-bold">TRANSACTION COMPLETE</div>
+                                <h4 id="settled-title" class="font-bold text-xs text-white mt-2">SETTLED</h4>
+                                <p id="settled-desc" class="text-[10px] text-slate-400 mt-1">API settlement payload fires and resolves transaction loops securely.</p>
+                                <div class="mt-2 text-xs flex items-center justify-between gap-2">
+                                    <span id="settled-status" class="text-[10px] text-brandEmerald font-bold tracking-wider">PAYMENT CLEARED</span>
+                                    <span id="countdown-payment" class="font-mono text-brandOrange font-bold hidden text-xs">-</span>
+                                </div>
                             </div>
 
                         </div>
@@ -262,55 +267,140 @@
                     </div>
 
                     <!-- THE SIMULATOR CONTROL DECK -->
-                    <div class="bg-brandSlate/30 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                            <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
-                                <span>⚡</span> Open Banking API Webhook Controls
-                            </h4>
-                            <span class="text-xs text-slate-500">Interactive Inputs</span>
-                        </div>
+                    <div class="bg-brandSlate/30 border border-slate-800 rounded-2xl p-6 space-y-6">
                         
+                        <div class="border-b border-slate-800 pb-3">
+                            <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
+                                <span>⚙️</span> Interactive Sliders (Global Configurations & Bounds)
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Simulate variations to standard timeline boundaries. Delivery, Inspection, and Rejection limits are admin parameters; Payment delay is seller-configurable.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            
+                            <!-- 1. Admin Delivery (TR_DELIVERY) -->
+                            <div class="bg-slate-950 p-3 rounded-xl space-y-2 border border-slate-800">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-brandOrange"></span> TR_DELIVERY (Admin)
+                                    </span>
+                                    <span id="admin-delivery-val" class="text-[10px] font-mono text-brandOrange font-bold">15s</span>
+                                </div>
+                                <input id="admin-delivery-slider" type="range" min="3" max="30" value="15" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brandOrange">
+                                <p class="text-[9px] text-slate-500 italic">Pre-fulfillment limit</p>
+                            </div>
+
+                            <!-- 2. Admin Inspection (TR_INSPECTION) -->
+                            <div class="bg-slate-950 p-3 rounded-xl space-y-2 border border-slate-800">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-brandBlue"></span> TR_INSPECTION (Admin)
+                                    </span>
+                                    <span id="admin-inspection-val" class="text-[10px] font-mono text-brandBlue font-bold">20s</span>
+                                </div>
+                                <input id="admin-inspection-slider" type="range" min="3" max="30" value="20" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brandBlue">
+                                <p class="text-[9px] text-slate-500 italic">Validation period</p>
+                            </div>
+
+                            <!-- 3. Admin Rejection (TR_REJECTION) -->
+                            <div class="bg-slate-950 p-3 rounded-xl space-y-2 border border-slate-800">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-brandPurple"></span> TR_REJECTION (Admin)
+                                    </span>
+                                    <span id="admin-rejection-val" class="text-[10px] font-mono text-brandPurple font-bold">12s</span>
+                                </div>
+                                <input id="admin-rejection-slider" type="range" min="3" max="30" value="12" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brandPurple">
+                                <p class="text-[9px] text-slate-500 italic">Reconciliation bound</p>
+                            </div>
+
+                            <!-- 4. Seller Payment Delay (TR_PAYMENT) -->
+                            <div class="bg-slate-950 p-3 rounded-xl space-y-2 border border-slate-800">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-brandEmerald"></span> TR_PAYMENT (Seller)
+                                    </span>
+                                    <span id="seller-payment-val" class="text-[10px] font-mono text-brandEmerald font-bold">5s</span>
+                                </div>
+                                <input id="seller-payment-slider" type="range" min="0" max="20" value="5" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brandEmerald">
+                                <p class="text-[9px] text-slate-500 italic">Settlement cooling gate</p>
+                            </div>
+
+                        </div>
+
+                        <div class="border-b border-slate-800 pb-3 pt-2">
+                            <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
+                                <span>⚡</span> Open Banking API & Interactive Transition Triggers
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Dispatch programmatic triggers. Experience how rejection reconciliation states and timing extensions isolate risks before escalating.</p>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                             <!-- Init Trigger -->
                             <button id="btn-buyer-pays" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandBlue/50 text-left transition duration-200 group">
                                 <span class="text-[10px] text-brandBlue font-mono uppercase mb-1">API Webhook</span>
                                 <span class="font-semibold text-xs text-white group-hover:text-brandBlue transition">Buyer Authorizes Deposit</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Simulates buyer paying $1,500 into ring-fenced node ledger.</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Simulates buyer paying $1,500 into secure trust ledger.</span>
                             </button>
                             
                             <!-- Delivery Logged Trigger -->
                             <button id="btn-courier-delivers" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandIndigo/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
                                 <span class="text-[10px] text-brandIndigo font-mono uppercase mb-1">Logistics API Webhook</span>
                                 <span class="font-semibold text-xs text-white group-hover:text-brandIndigo transition">Courier Inputs OTP</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Simulates parcel delivery event via GIG Logistics API.</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Simulates verified package delivery handshake.</span>
                             </button>
 
                             <!-- Timeout Delivery Trigger -->
                             <button id="btn-delivery-timeout" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandRed/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
                                 <span class="text-[10px] text-brandRed font-mono uppercase mb-1">Chronological Gate</span>
                                 <span class="font-semibold text-xs text-white group-hover:text-brandRed transition">Simulate Delivery Timeout</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Forces TR_DELIVERY time expiry. Standard: 72 hours.</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Forces TR_DELIVERY time expiry. Default auto-cancel.</span>
                             </button>
 
                             <!-- Buyer Approves Trigger -->
                             <button id="btn-buyer-approves" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandEmerald/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
-                                <span class="text-[10px] text-brandEmerald font-mono uppercase mb-1">User Front-End Action</span>
-                                <span class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Buyer Approves Cargo</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Instantly bypasses TR_INSPECTION timer directly to payout.</span>
+                                <span class="text-[10px] text-brandEmerald font-mono uppercase mb-1">User Action</span>
+                                <span id="approve-label-main" class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Buyer Approves Cargo</span>
+                                <span id="approve-desc-main" class="text-[10px] text-slate-500 mt-1">Bypasses TR_INSPECTION directly to cooling period or payout.</span>
                             </button>
 
-                            <!-- Buyer Rejects/Dispute Trigger -->
-                            <button id="btn-buyer-rejects" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandOrange/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
-                                <span class="text-[10px] text-brandOrange font-mono uppercase mb-1">User Dispute API</span>
-                                <span class="font-semibold text-xs text-white group-hover:text-brandOrange transition">Buyer Submits Rejection</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Freezes ledger and triggers Traffic-Light Dispute workflow.</span>
+                            <!-- Buyer Rejects Trigger -->
+                            <button id="btn-buyer-rejects" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandPurple/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandPurple font-mono uppercase mb-1">User Action</span>
+                                <span id="reject-label-main" class="font-semibold text-xs text-white group-hover:text-brandPurple transition">Buyer Rejects Cargo</span>
+                                <span id="reject-desc-main" class="text-[10px] text-slate-500 mt-1">Triggers active TR_REJECTION reconciliation phase.</span>
+                            </button>
+
+                            <!-- RESOLUTION TRANSITIONS (STATE 04 ONLY) -->
+                            <button id="btn-reconcile-accept" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandEmerald/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandEmerald font-mono uppercase mb-1">Reconciliation Action</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Accept Resolution</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Issue resolved. Automatically fires payment timers.</span>
+                            </button>
+
+                            <button id="btn-reconcile-extend" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandPurple/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandPurple font-mono uppercase mb-1">Buyer Policy Benefit</span>
+                                <span id="extend-btn-label" class="font-semibold text-xs text-white group-hover:text-brandPurple transition">Extend Reconcile Timer</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Adds +5s (24h simulation time) to reconcile (Max 2).</span>
+                            </button>
+
+                            <button id="btn-reconcile-escalate" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandRed/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandRed font-mono uppercase mb-1">Triage Manual Override</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandRed transition">Escalate to Dispute</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Unsatisfactory resolution. Forces Dispute Triage.</span>
+                            </button>
+
+                            <button id="btn-reconcile-cancel" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandRed/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandRed font-mono uppercase mb-1">Mutual Handshake</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandRed transition">Agree to Cancel Deal</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Both parties opt to dissolve. Reverts 100% of funds.</span>
                             </button>
 
                             <!-- Resolve Dispute Trigger -->
                             <button id="btn-resolve-dispute" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandIndigo/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
                                 <span class="text-[10px] text-brandIndigo font-mono uppercase mb-1">Compliance Module</span>
                                 <span class="font-semibold text-xs text-white group-hover:text-brandIndigo transition">Resolve Dispute</span>
-                                <span class="text-[10px] text-slate-500 mt-1">Executes payout routing to close out the arbitration tree.</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Arbitrator executes routing payloads to complete deal.</span>
                             </button>
                         </div>
                     </div>
@@ -333,7 +423,7 @@
                     </div>
 
                     <!-- PROGRAMMATIC OPEN BANKING PAYLOAD ENGINE -->
-                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-[280px]">
+                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-[300px]">
                         <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
                             <span class="text-xs font-mono font-bold text-slate-400">API ROUTING PAYLOAD (JSON)</span>
                             <button id="copy-payload" class="text-xs text-slate-500 hover:text-white flex items-center gap-1 transition">
@@ -353,7 +443,7 @@
                             </pre>
                         </div>
                         <div class="text-[10px] text-slate-500 mt-2 italic text-right">
-                            *Auto-generated based on simulator active node.
+                            *Auto-generated based on simulator active configurations.
                         </div>
                     </div>
 
@@ -396,7 +486,7 @@
                                     <strong>Concept:</strong> An event-driven logic engine.
                                 </p>
                                 <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                                    Execution: The transaction moves through explicit states (e.g., INITIALIZED → PENDING_DELIVERY → INSPECTION → SETTLED). Transitions are triggered exclusively by API webhooks or chronological countdowns (Redis-backed timers).
+                                    Execution: The transaction moves through explicit states (e.g., INITIALIZED → PENDING_DELIVERY → INSPECTION → REJECTION_RECONCILIATION → SETTLED). Transitions are triggered exclusively by API webhooks or chronological countdowns (Redis-backed timers).
                                 </p>
                                 <div class="font-mono text-[10px] text-brandEmerald bg-brandEmerald/10 p-2.5 rounded border border-brandEmerald/20">
                                     [STATE MACHINE FLOW]<br/>
@@ -442,19 +532,19 @@
                                         <td class="p-3 font-mono text-brandBlue font-semibold">TR_INSPECTION</td>
                                         <td class="p-3 text-slate-400">Courier Webhook / OTP</td>
                                         <td class="p-3 text-slate-400">24h (Goods) / 48h (Services)</td>
-                                        <td class="p-3 text-brandEmerald font-semibold">Auto-approves delivery. Fires the Payment Timer.</td>
+                                        <td class="p-3 text-brandEmerald font-semibold">Auto-approves delivery. Fires the Rejection / Payment Timers.</td>
                                     </tr>
                                     <tr class="hover:bg-slate-900/40">
-                                        <td class="p-3 font-mono text-brandRed font-semibold">TR_REJECTION</td>
-                                        <td class="p-3 text-slate-400">Buyer Logs a Dispute</td>
-                                        <td class="p-3 text-slate-400">48-Hour Buffer</td>
-                                        <td class="p-3 text-slate-400">Freezes ledger slice. Routes payload to Dispute Triage API.</td>
+                                        <td class="p-3 font-mono text-brandPurple font-semibold">TR_REJECTION</td>
+                                        <td class="p-3 text-slate-400">Buyer Logs a Rejection</td>
+                                        <td class="p-3 text-slate-400">48h (Customizable/Extendable by Buyer)</td>
+                                        <td class="p-3 text-brandRed font-semibold">Buyer rejection buffer. Failsafe transition directly to Dispute Triage.</td>
                                     </tr>
                                     <tr class="hover:bg-slate-900/40">
                                         <td class="p-3 font-mono text-brandEmerald font-semibold">TR_PAYMENT</td>
                                         <td class="p-3 text-slate-400">Inspection Cleared</td>
-                                        <td class="p-3 text-slate-400">Instantaneous</td>
-                                        <td class="p-3 text-brandEmerald font-semibold">Executes settlement payload to Partner Bank Open Banking API.</td>
+                                        <td class="p-3 text-slate-400">Seller Configurable (0 - 48h Category Bound)</td>
+                                        <td class="p-3 text-brandEmerald font-semibold">Executes settlement payload to Partner Bank Open Banking API. Can be disputed/interrupted during countdown.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -484,15 +574,15 @@
                 <!-- Q4 -->
                 <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
                     <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-4')">
-                        <span class="font-bold text-base text-slate-200">Q4: How does the system know when to trigger the Post-Delivery Verification phase?</span>
+                        <span class="font-bold text-base text-slate-200">Q4: How does the system handle rejection cooling-off states before formal disputes?</span>
                         <span id="icon-qa-4" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
                     </button>
                     <div id="qa-4" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
                         <p class="text-sm text-slate-400 leading-relaxed">
-                            The <code class="font-mono text-brandBlue">TR_INSPECTION</code> and <code class="font-mono text-brandRed">TR_REJECTION</code> timers are completely dead/inactive until the exact moment an authenticated delivery event is logged.
+                            Instead of routing a rejecting buyer directly to manual dispute mediation (which increases human operational overhead), the state machine implements a intermediate **Rejection Reconciliation** state governed by the <code class="font-mono text-brandPurple">TR_REJECTION</code> timer.
                         </p>
                         <p class="text-sm text-slate-400 leading-relaxed">
-                            We do not rely on sellers clicking "I shipped it." We rely on direct third-party API integrations (such as a **GIG Logistics API** or **DHL Webhook**). When the courier inputs the One-Time Password (OTP) or delivery code at the buyer's doorstep, the logistics platform triggers a webhook payload directly into our state machine. That specific event-trigger instantly destroys the <code class="font-mono text-brandOrange">TR_DELIVERY</code> timer and ignites the <code class="font-mono text-brandBlue">TR_INSPECTION</code> timer.
+                            This state functions as an interactive sandbox. The seller and buyer are given time to self-resolve issues (e.g. shipping missing parts, partial pricing refunds) under automated timing. The buyer can programmatically **Extend the Timer** up to 2 times within policy boundaries to provide extra reconciliation margins. If a resolution is agreed upon, the buyer accepts, automatically launching the `SETTLED` payment loop. If resolution fails, or if the timer expires, the system defaults directly to the `DISPUTE_TRIAGE` track.
                         </p>
                     </div>
                 </div>
@@ -583,12 +673,14 @@
         </div>
     </footer>
 
+    <!-- javascript logic -->
     <script>
         // State Definitions
         const STATES = {
             INITIALIZATION: 'INITIALIZATION',
             PRE_FULFILLMENT: 'PRE-FULFILLMENT',
             POST_FULFILLMENT: 'POST-FULFILLMENT',
+            REJECTION_RECONCILIATION: 'REJECTION-RECONCILIATION',
             DISPUTE_TRIAGE: 'DISPUTE-TRIAGE',
             AUTO_CANCELLED: 'AUTO-CANCELLED',
             SETTLED: 'SETTLED'
@@ -604,6 +696,7 @@
             if (type === 'error') { colorClass = 'text-brandRed'; icon = '⚠️'; }
             if (type === 'success') { colorClass = 'text-brandEmerald'; icon = '✅'; }
             if (type === 'timer') { colorClass = 'text-brandOrange'; icon = '⏱️'; }
+            if (type === 'reconcile') { colorClass = 'text-brandPurple'; icon = '🔄'; }
 
             const logItem = document.createElement('div');
             logItem.className = `flex items-start gap-1.5 leading-relaxed py-0.5 ${colorClass}`;
@@ -613,18 +706,25 @@
             logConsole.scrollTop = logConsole.scrollHeight;
         }
 
-        // State & Timer Variables
         let currentState = STATES.INITIALIZATION;
         let lastEvent = 'ENGINE_INITIALIZED';
         let contractAmount = 0.00;
         let activeTimer = null;
         let timerSecondsLeft = 0;
+        let rejectionExtensionCount = 0; // Tracks buyer-asserted extensions
+
+        // Default Configurable Durations
+        let deliveryDuration = 15;      // Admin: TR_DELIVERY limit
+        let inspectionDuration = 20;    // Admin: TR_INSPECTION limit
+        let rejectionDuration = 12;     // Admin: TR_REJECTION limit
+        let sellerPaymentDuration = 5;  // Seller: TR_PAYMENT delay
 
         // Visual DOM element arrays
         const cardElements = {
             [STATES.INITIALIZATION]: document.getElementById('state-INITIALIZATION'),
             [STATES.PRE_FULFILLMENT]: document.getElementById('state-PRE-FULFILLMENT'),
             [STATES.POST_FULFILLMENT]: document.getElementById('state-POST-FULFILLMENT'),
+            [STATES.REJECTION_RECONCILIATION]: document.getElementById('state-REJECTION-RECONCILIATION'),
             [STATES.DISPUTE_TRIAGE]: document.getElementById('state-DISPUTE-TRIAGE'),
             [STATES.AUTO_CANCELLED]: document.getElementById('state-AUTO-CANCELLED'),
             [STATES.SETTLED]: document.getElementById('state-SETTLED'),
@@ -636,26 +736,87 @@
             deliveryTimeout: document.getElementById('btn-delivery-timeout'),
             approves: document.getElementById('btn-buyer-approves'),
             rejects: document.getElementById('btn-buyer-rejects'),
+            
+            reconcileAccept: document.getElementById('btn-reconcile-accept'),
+            reconcileExtend: document.getElementById('btn-reconcile-extend'),
+            reconcileEscalate: document.getElementById('btn-reconcile-escalate'),
+            reconcileCancel: document.getElementById('btn-reconcile-cancel'),
+
             resolve: document.getElementById('btn-resolve-dispute'),
         };
 
-        // Setup active timers badges & displays
+        // Active timers badges & displays
         const timerBadgeDelivery = document.getElementById('timer-badge-delivery');
         const timerBadgeInspection = document.getElementById('timer-badge-inspection');
+        const timerBadgeRejection = document.getElementById('timer-badge-rejection');
+        
         const countdownDelivery = document.getElementById('countdown-delivery');
         const countdownInspection = document.getElementById('countdown-inspection');
+        const countdownRejection = document.getElementById('countdown-rejection');
+        const countdownPayment = document.getElementById('countdown-payment');
+
+        // Config Elements
+        const sliderDelivery = document.getElementById('admin-delivery-slider');
+        const valDeliveryDisplay = document.getElementById('admin-delivery-val');
+        const sliderInspection = document.getElementById('admin-inspection-slider');
+        const valInspectionDisplay = document.getElementById('admin-inspection-val');
+        const sliderRejection = document.getElementById('admin-rejection-slider');
+        const valRejectionDisplay = document.getElementById('admin-rejection-val');
+        const sliderPayment = document.getElementById('seller-payment-slider');
+        const valPaymentDisplay = document.getElementById('seller-payment-val');
+
+        // Dynamic labels
+        const approveLabelMain = document.getElementById('approve-label-main');
+        const approveDescMain = document.getElementById('approve-desc-main');
+        const disputeLabelMain = document.getElementById('reject-label-main');
+        const disputeDescMain = document.getElementById('reject-desc-main');
+        const extendBtnLabel = document.getElementById('extend-btn-label');
+
+        sliderDelivery.addEventListener('input', function() {
+            deliveryDuration = parseInt(this.value);
+            valDeliveryDisplay.innerText = `${deliveryDuration}s`;
+            if (currentState === STATES.PRE_FULFILLMENT) {
+                addLog(`Admin Event: TR_DELIVERY boundary live updated to ${deliveryDuration}s`, 'timer');
+            }
+        });
+
+        sliderInspection.addEventListener('input', function() {
+            inspectionDuration = parseInt(this.value);
+            valInspectionDisplay.innerText = `${inspectionDuration}s`;
+            if (currentState === STATES.POST_FULFILLMENT) {
+                addLog(`Admin Event: TR_INSPECTION boundary live updated to ${inspectionDuration}s`, 'timer');
+            }
+        });
+
+        sliderRejection.addEventListener('input', function() {
+            rejectionDuration = parseInt(this.value);
+            valRejectionDisplay.innerText = `${rejectionDuration}s`;
+            if (currentState === STATES.REJECTION_RECONCILIATION) {
+                addLog(`Admin Event: TR_REJECTION baseline live updated to ${rejectionDuration}s`, 'timer');
+            }
+        });
+
+        sliderPayment.addEventListener('input', function() {
+            sellerPaymentDuration = parseInt(this.value);
+            if (sellerPaymentDuration === 0) {
+                valPaymentDisplay.innerText = "Instant (0s)";
+            } else {
+                valPaymentDisplay.innerText = `${sellerPaymentDuration}s`;
+            }
+            if (currentState === STATES.SETTLED && lastEvent === 'PAYMENT_PENDING') {
+                addLog(`Seller Event: TR_PAYMENT delay live updated to ${sellerPaymentDuration}s`, 'timer');
+            }
+        });
 
         // Copy Payload Feature
         document.getElementById('copy-payload').addEventListener('click', function() {
             const payloadCode = document.getElementById('payload-content').innerText;
-            // Use fallback browser copy for compatibility within safe limits
             const el = document.createElement('textarea');
             el.value = payloadCode;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            
             addLog("JSON Payload copied to clipboard", 'success');
         });
 
@@ -663,7 +824,6 @@
         function toggleAccordion(id) {
             const panel = document.getElementById(id);
             const icon = document.getElementById('icon-' + id);
-            
             if (panel.classList.contains('hidden')) {
                 panel.classList.remove('hidden');
                 icon.style.transform = 'rotate(180deg)';
@@ -682,8 +842,12 @@
             timerSecondsLeft = 0;
             countdownDelivery.innerText = '-';
             countdownInspection.innerText = '-';
+            countdownRejection.innerText = '-';
+            countdownPayment.innerText = '-';
+            countdownPayment.classList.add('hidden');
             timerBadgeDelivery.classList.add('hidden');
             timerBadgeInspection.classList.add('hidden');
+            timerBadgeRejection.classList.add('hidden');
         }
 
         // Live JSON payload preview generator
@@ -692,24 +856,38 @@
             let actionText = "HOLD_AUTHORIZED";
             if (currentState === STATES.PRE_FULFILLMENT) actionText = "AWAITING_COURIER_WEBHOOK";
             if (currentState === STATES.POST_FULFILLMENT) actionText = "INSPECTION_WINDOW_ACTIVE";
+            if (currentState === STATES.REJECTION_RECONCILIATION) actionText = "RECONCILIATION_PERIOD_ACTIVE";
             if (currentState === STATES.DISPUTE_TRIAGE) actionText = "LOCK_LEDGER_SLICE";
             if (currentState === STATES.AUTO_CANCELLED) actionText = "REVERT_100_PERCENT";
-            if (currentState === STATES.SETTLED) actionText = "EXECUTE_OPEN_BANKING_DISPATCH";
+            if (currentState === STATES.SETTLED) {
+                actionText = sellerPaymentDuration > 0 && lastEvent === 'PAYMENT_PENDING' ? "PAYMENT_COOLING_HOLD" : "EXECUTE_OPEN_BANKING_DISPATCH";
+            }
 
             const payloadData = {
                 contract_ref: "TP-8F84-2026",
                 status: currentState,
                 amount_fiat: contractAmount,
                 bank_holding: "Zenith Bank PLC",
-                escrow_locked: (currentState === STATES.PRE_FULFILLMENT || currentState === STATES.POST_FULFILLMENT || currentState === STATES.DISPUTE_TRIAGE),
+                escrow_locked: (currentState === STATES.PRE_FULFILLMENT || currentState === STATES.POST_FULFILLMENT || currentState === STATES.REJECTION_RECONCILIATION || currentState === STATES.DISPUTE_TRIAGE || (currentState === STATES.SETTLED && lastEvent === 'PAYMENT_PENDING')),
                 routing_action: actionText,
+                admin_limits: {
+                    tr_delivery_max: `${deliveryDuration * 4.8} Hours`,
+                    tr_inspection_max: `${inspectionDuration * 2.4} Hours`,
+                    tr_rejection_max: `${rejectionDuration * 4.0} Hours`
+                },
+                seller_configs: {
+                    tr_payment_hold: `${sellerPaymentDuration * 2.4} Hours`
+                },
+                buyer_actions: {
+                    rejection_extensions_utilized: rejectionExtensionCount,
+                    max_allowable_extensions: 2
+                },
                 event_hash: "0x" + Math.floor(Math.random() * 1000000).toString(16).toUpperCase()
             };
 
             payloadContent.innerText = JSON.stringify(payloadData, null, 2);
         }
 
-        // UI state update function
         function setEngineState(targetState, eventTriggerName) {
             currentState = targetState;
             lastEvent = eventTriggerName;
@@ -720,7 +898,7 @@
 
             // Reset CSS classes across all nodes
             Object.values(cardElements).forEach(el => {
-                el.classList.remove('active-blue', 'active-orange', 'active-emerald', 'active-red');
+                el.classList.remove('active-blue', 'active-orange', 'active-purple', 'active-emerald', 'active-red');
                 el.style.transform = 'scale(1)';
             });
 
@@ -732,14 +910,26 @@
                 activeEl.classList.add('active-orange');
             } else if (currentState === STATES.POST_FULFILLMENT) {
                 activeEl.classList.add('active-blue');
+            } else if (currentState === STATES.REJECTION_RECONCILIATION) {
+                activeEl.classList.add('active-purple');
             } else if (currentState === STATES.DISPUTE_TRIAGE) {
                 activeEl.classList.add('active-red');
             } else if (currentState === STATES.AUTO_CANCELLED) {
                 activeEl.classList.add('active-red');
             } else if (currentState === STATES.SETTLED) {
-                activeEl.classList.add('active-emerald');
+                if (eventTriggerName === 'PAYMENT_PENDING') {
+                    activeEl.classList.add('active-orange');
+                } else {
+                    activeEl.classList.add('active-emerald');
+                }
             }
-            activeEl.style.transform = 'scale(1.03)';
+            activeEl.style.transform = 'scale(1.02)';
+
+            // Reset Dynamic Button Texts to Default
+            approveLabelMain.innerText = "Buyer Approves Cargo";
+            approveDescMain.innerText = "Bypasses TR_INSPECTION directly to cooling period or payout.";
+            disputeLabelMain.innerText = "Buyer Rejects Cargo";
+            disputeDescMain.innerText = "Triggers active TR_REJECTION reconciliation phase.";
 
             // Control Trigger Button Enable/Disable Matrix
             Object.values(buttons).forEach(btn => {
@@ -760,13 +950,41 @@
                 buttons.approves.classList.remove('opacity-50', 'cursor-not-allowed');
                 buttons.rejects.disabled = false;
                 buttons.rejects.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentState === STATES.REJECTION_RECONCILIATION) {
+                // Unlock State 04 specific controls
+                buttons.reconcileAccept.disabled = false;
+                buttons.reconcileAccept.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.reconcileEscalate.disabled = false;
+                buttons.reconcileEscalate.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.reconcileCancel.disabled = false;
+                buttons.reconcileCancel.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                // Unlock extension button if bounds permit (max 2 extensions)
+                if (rejectionExtensionCount < 2) {
+                    buttons.reconcileExtend.disabled = false;
+                    buttons.reconcileExtend.classList.remove('opacity-50', 'cursor-not-allowed');
+                    extendBtnLabel.innerText = "Extend Reconcile Timer";
+                } else {
+                    extendBtnLabel.innerText = "Max Extensions Met";
+                }
             } else if (currentState === STATES.DISPUTE_TRIAGE) {
                 buttons.resolve.disabled = false;
                 buttons.resolve.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentState === STATES.SETTLED && eventTriggerName === 'PAYMENT_PENDING') {
+                // Dynamic Buyer Options during active payment cooling window
+                buttons.approves.disabled = false;
+                buttons.approves.classList.remove('opacity-50', 'cursor-not-allowed');
+                approveLabelMain.innerText = "Execute Instant Payment";
+                approveDescMain.innerText = "Buyer manual trigger to bypass the cooling countdown instantly.";
+
+                buttons.rejects.disabled = false;
+                buttons.rejects.classList.remove('opacity-50', 'cursor-not-allowed');
+                disputeLabelMain.innerText = "Intervene: Log Dispute";
+                disputeDescMain.innerText = "Intercepts the pending cooling hold to freeze funds.";
             }
 
-            // Fire logger & visual adjustments
-            addLog(`State updated to: [${currentState}]`, 'success');
+            // Update logger & visual formats
+            addLog(`State updated to: [${currentState}] (Trigger: ${eventTriggerName})`, 'success');
             updatePayloadPreview();
         }
 
@@ -782,9 +1000,9 @@
             
             // Activate Simulated TR_DELIVERY Countdown
             clearActiveTimers();
-            timerSecondsLeft = 15; // Accelerating 72h down to 15 seconds
+            timerSecondsLeft = deliveryDuration; 
             timerBadgeDelivery.classList.remove('hidden');
-            addLog("Clock trigger: TR_DELIVERY initialized (72 Hour Window).", 'timer');
+            addLog(`Clock trigger: TR_DELIVERY initialized (Admin-configured ${deliveryDuration}s Window).`, 'timer');
 
             activeTimer = setInterval(() => {
                 timerSecondsLeft--;
@@ -804,16 +1022,16 @@
             setEngineState(STATES.POST_FULFILLMENT, 'COURIER_DELIVERY_CONFIRMED');
 
             // Activate Simulated TR_INSPECTION Countdown
-            timerSecondsLeft = 20; // 48h down to 20 seconds
+            timerSecondsLeft = inspectionDuration; 
             timerBadgeInspection.classList.remove('hidden');
-            addLog("Clock trigger: TR_INSPECTION initialized (48 Hour Window).", 'timer');
+            addLog(`Clock trigger: TR_INSPECTION initialized (Admin-configured ${inspectionDuration}s Window).`, 'timer');
 
             activeTimer = setInterval(() => {
                 timerSecondsLeft--;
                 countdownInspection.innerText = `${timerSecondsLeft}s remaining`;
                 if (timerSecondsLeft <= 0) {
                     clearActiveTimers();
-                    addLog("Clock trigger: TR_INSPECTION expired without dispute.", 'timer');
+                    addLog("Clock trigger: TR_INSPECTION expired without buyer response.", 'timer');
                     executeSettlement();
                 }
             }, 1000);
@@ -826,19 +1044,88 @@
             executeAutoCancel();
         });
 
-        // 4. Buyer Approves
+        // 4. Buyer Approves / Executes Payout
         buttons.approves.addEventListener('click', function() {
-            addLog("Action: Buyer approves delivery explicitly via app portal.", 'system');
+            if (currentState === STATES.SETTLED && lastEvent === 'PAYMENT_PENDING') {
+                addLog("Action: Buyer bypasses cooling hold to trigger manual payment.", 'system');
+                finalizeSettlement();
+            } else {
+                addLog("Action: Buyer approves cargo delivery explicitly.", 'system');
+                clearActiveTimers();
+                executeSettlement();
+            }
+        });
+
+        // 5. Buyer Rejects / Raise Dispute (Active in Post-Fulfillment AND Settlement Pending)
+        buttons.rejects.addEventListener('click', function() {
+            if (currentState === STATES.SETTLED && lastEvent === 'PAYMENT_PENDING') {
+                // Intercepting active cooling period triggers an immediate manual dispute triage
+                addLog("Action: Buyer intercepted cooling hold to log a late-stage dispute!", 'error');
+                clearActiveTimers();
+                setEngineState(STATES.DISPUTE_TRIAGE, 'DISPUTE_LATE_INTERCEPT');
+                addLog("Ledger command: freeze_ledger_slice activated.", 'system');
+            } else {
+                // Inspection rejection triggers the State 04 Rejection Reconciliation Period
+                addLog("Action: Buyer rejected delivery. Initializing Reconciliation state.", 'reconcile');
+                clearActiveTimers();
+                setEngineState(STATES.REJECTION_RECONCILIATION, 'BUYER_REJECTION_INITIALIZED');
+                
+                // Ignite TR_REJECTION Timer Countdown
+                timerSecondsLeft = rejectionDuration;
+                timerBadgeRejection.classList.remove('hidden');
+                addLog(`Clock trigger: TR_REJECTION initialized (Admin-configured ${rejectionDuration}s Window).`, 'timer');
+
+                activeTimer = setInterval(() => {
+                    timerSecondsLeft--;
+                    countdownRejection.innerText = `${timerSecondsLeft}s remaining`;
+                    if (timerSecondsLeft <= 0) {
+                        clearActiveTimers();
+                        addLog("Clock trigger: TR_REJECTION expired. Resolution failed or ignored.", 'timer');
+                        addLog("Failsafe: Defaulting to Dispute Triage track.", 'error');
+                        setEngineState(STATES.DISPUTE_TRIAGE, 'REJECTION_TIMER_EXPIRED');
+                    }
+                }, 1000);
+            }
+        });
+
+        // REJECTION RECONCILIATION STATE (04) ACTION HANDLERS
+        
+        // 5a. Accept Resolution
+        buttons.reconcileAccept.addEventListener('click', function() {
+            addLog("Reconciliation Action: Buyer accepts seller's resolution proposal.", 'success');
             clearActiveTimers();
             executeSettlement();
         });
 
-        // 5. Buyer Rejects / Raise Dispute
-        buttons.rejects.addEventListener('click', function() {
-            addLog("Action: Buyer raised dispute ticket 'Item Significantly Not As Described'.", 'error');
+        // 5b. Extend Reconcile Timer
+        buttons.reconcileExtend.addEventListener('click', function() {
+            if (rejectionExtensionCount < 2) {
+                rejectionExtensionCount++;
+                timerSecondsLeft += 5; // Simulates adding 24 hours
+                addLog(`Action: Buyer extended the reconciliation window. Added +5s (+24h simulation time). Extension: [${rejectionExtensionCount}/2]`, 'reconcile');
+                countdownRejection.innerText = `${timerSecondsLeft}s remaining`;
+                updatePayloadPreview();
+
+                if (rejectionExtensionCount >= 2) {
+                    buttons.reconcileExtend.disabled = true;
+                    buttons.reconcileExtend.classList.add('opacity-50', 'cursor-not-allowed');
+                    extendBtnLabel.innerText = "Max Extensions Met";
+                }
+            }
+        });
+
+        // 5c. Escalate to Dispute
+        buttons.reconcileEscalate.addEventListener('click', function() {
+            addLog("Action: Buyer declared resolution unsatisfactory. Escalling to dispute triage.", 'error');
             clearActiveTimers();
-            setEngineState(STATES.DISPUTE_TRIAGE, 'DISPUTE_INITIATED');
-            addLog("Ledger command: freeze_ledger_slice activated. Escrow funds locked.", 'system');
+            setEngineState(STATES.DISPUTE_TRIAGE, 'BUYER_ESCALATED_RECONCILIATION');
+        });
+
+        // 5d. Mutual Agreement to Cancel
+        buttons.reconcileCancel.addEventListener('click', function() {
+            addLog("Action: Both parties agreed to cancel transaction.", 'reconcile');
+            clearActiveTimers();
+            executeAutoCancel();
         });
 
         // 6. Dispute Resolution (Tiers 1-3)
@@ -851,14 +1138,59 @@
         function executeAutoCancel() {
             addLog("Ledger command: reverse_buyer_deposits initiated.", 'system');
             addLog("Settlement payload executed to Open Banking rails. Returning $1,500.00.", 'success');
-            setEngineState(STATES.AUTO_CANCELLED, 'TR_DELIVERY_EXPIRED');
+            setEngineState(STATES.AUTO_CANCELLED, 'TR_REVERTED_100_PERCENT');
         }
 
-        // Settlement Execution
+        // Settlement Execution with Configurable Delay Countdown
         function executeSettlement() {
-            addLog("Clock trigger: TR_PAYMENT fired instantaneously.", 'timer');
+            clearActiveTimers();
+            
+            if (sellerPaymentDuration > 0) {
+                // Initiate TR_PAYMENT delay countdown
+                addLog(`Clock trigger: TR_PAYMENT initialized (Seller-configured ${sellerPaymentDuration}s cooling hold).`, 'timer');
+                setEngineState(STATES.SETTLED, 'PAYMENT_PENDING');
+                
+                // Customize Settled Card visual state for pending payment cooling window
+                document.getElementById('settled-badge').innerText = "COOLING PERIOD";
+                document.getElementById('settled-badge').className = "text-[10px] bg-brandOrange/20 text-brandOrange border border-brandOrange/30 px-1.5 py-0.5 rounded font-mono font-semibold";
+                document.getElementById('settled-title').innerText = "RELEASE PENDING";
+                document.getElementById('settled-desc').innerText = "Funds in cooling-off hold. Dispute can be logged by the buyer.";
+                document.getElementById('settled-status').innerText = "RELEASING FUNDS...";
+                document.getElementById('settled-status').className = "text-brandOrange font-semibold animate-pulse";
+                
+                countdownPayment.classList.remove('hidden');
+                timerSecondsLeft = sellerPaymentDuration;
+                countdownPayment.innerText = `${timerSecondsLeft}s`;
+
+                activeTimer = setInterval(() => {
+                    timerSecondsLeft--;
+                    countdownPayment.innerText = `${timerSecondsLeft}s`;
+                    if (timerSecondsLeft <= 0) {
+                        clearInterval(activeTimer);
+                        activeTimer = null;
+                        countdownPayment.classList.add('hidden');
+                        finalizeSettlement();
+                    }
+                }, 1000);
+            } else {
+                addLog("Clock trigger: TR_PAYMENT was set to 0s (Instant settlement).", 'timer');
+                finalizeSettlement();
+            }
+        }
+
+        function finalizeSettlement() {
+            clearActiveTimers();
             addLog("Ledger command: compile_settlement_payload.", 'system');
             addLog("Settlement payload successfully pushed to Zenith Bank API.", 'success');
+            
+            // Restore card to original fully settled parameters
+            document.getElementById('settled-badge').innerText = "SETTLED";
+            document.getElementById('settled-badge').className = "text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold";
+            document.getElementById('settled-title').innerText = "SETTLED";
+            document.getElementById('settled-desc').innerText = "API payload clears transaction to verified partner bank rails.";
+            document.getElementById('settled-status').innerText = "TRANSACTION COMPLETE";
+            document.getElementById('settled-status').className = "text-brandEmerald font-bold tracking-wider";
+            
             setEngineState(STATES.SETTLED, 'FUNDS_SETTLED_TO_SELLER');
         }
 
@@ -866,8 +1198,19 @@
         document.getElementById('reset-button').addEventListener('click', function() {
             clearActiveTimers();
             contractAmount = 0.00;
+            rejectionExtensionCount = 0;
             document.getElementById('state-val-01').innerText = "$0.00";
             logConsole.innerHTML = "";
+            
+            // Reset Settled card visual defaults
+            document.getElementById('settled-badge').innerText = "SETTLED";
+            document.getElementById('settled-badge').className = "text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold";
+            document.getElementById('settled-title').innerText = "SETTLED";
+            document.getElementById('settled-desc').innerText = "API payload clears transaction to verified partner bank rails.";
+            document.getElementById('settled-status').innerText = "TRANSACTION COMPLETE";
+            document.getElementById('settled-status').className = "text-brandEmerald font-bold tracking-wider";
+            countdownPayment.classList.add('hidden');
+
             addLog("System event: reset_engine_state invoked.", 'system');
             addLog("Engine Ready. Awaiting Open Banking handshakes...", 'system');
             setEngineState(STATES.INITIALIZATION, 'ENGINE_RESET');
