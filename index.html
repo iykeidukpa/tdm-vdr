@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustedPayer State Machine Architecture</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brandDark: '#0B0F19',
+                        brandSlate: '#1E293B',
+                        brandBlue: '#3B82F6',
+                        brandIndigo: '#6366F1',
+                        brandEmerald: '#10B981',
+                        brandOrange: '#F97316',
+                        brandRed: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #E2E8F0;
+        }
+        /* Custom scrollbar for log console */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+        /* State pulse animations */
+        @keyframes pulse-blue {
+            0%, 100% { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.4); }
+            50% { border-color: rgba(59, 130, 246, 1); box-shadow: 0 0 12px 4px rgba(59, 130, 246, 0.2); }
+        }
+        @keyframes pulse-orange {
+            0%, 100% { border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 0 0 0px rgba(249, 115, 22, 0.4); }
+            50% { border-color: rgba(249, 115, 22, 1); box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.2); }
+        }
+        @keyframes pulse-emerald {
+            0%, 100% { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.4); }
+            50% { border-color: rgba(16, 185, 129, 1); box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); }
+        }
+        @keyframes pulse-red {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.4); }
+            50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.2); }
+        }
+        .active-blue { animation: pulse-blue 2s infinite; border-width: 2px !important; background-color: rgba(59, 130, 246, 0.08) !important; }
+        .active-orange { animation: pulse-orange 2s infinite; border-width: 2px !important; background-color: rgba(249, 115, 22, 0.08) !important; }
+        .active-emerald { animation: pulse-emerald 2s infinite; border-width: 2px !important; background-color: rgba(16, 185, 129, 0.08) !important; }
+        .active-red { animation: pulse-red 2s infinite; border-width: 2px !important; background-color: rgba(239, 68, 68, 0.08) !important; }
+        
+        /* Flowchart connector properties */
+        .connector-line {
+            stroke: #334155;
+            stroke-width: 2;
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+        .connector-active {
+            stroke: #6366F1;
+            stroke-width: 3;
+            stroke-dasharray: 6;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -12;
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-brandBlue selection:text-white">
+
+    <header class="border-b border-slate-800 bg-brandDark/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-tr from-brandBlue to-brandIndigo rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-brandIndigo/20">
+                    TP
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white uppercase flex items-center gap-2">
+                        TrustedPayer <span class="text-xs bg-slate-800 text-brandBlue border border-slate-700 px-2 py-0.5 rounded-full font-mono normal-case">V3 Engine</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Multivariable Verification Architecture</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/20">
+                    <span class="w-2 h-2 bg-brandEmerald rounded-full mr-1.5 animate-pulse"></span> Production Active
+                </span>
+                <span class="text-xs text-slate-500 font-mono hidden sm:inline">REL_JUN_2026_V3</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+
+        <div class="bg-gradient-to-r from-brandSlate to-brandDark border border-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 text-9xl text-slate-800/20 font-bold select-none pointer-events-none">V3</div>
+            <div class="relative z-10 max-w-3xl space-y-4">
+                <div class="text-xs font-bold text-brandIndigo tracking-widest uppercase">INTERNAL ENGINEERING MEMO</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    Architectural Paradigm Shift:<br class="hidden sm:block"/>The Multivariable Time-Locked Verification State Machine
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                    This document clarifies our core architectural philosophy. We are not building a traditional escrow wallet. 
+                    We are building an automated, event-driven infrastructure. To scale without human bottlenecks, our backend is structured 
+                    as a Multivariable Time-Locked Verification State Machine.
+                </p>
+                <div class="flex flex-wrap gap-4 pt-2 text-xs text-slate-500">
+                    <span class="flex items-center gap-1">📅 June 2026</span>
+                    <span class="flex items-center gap-1">📂 Code: TP-OPS-STATE-003</span>
+                    <span class="flex items-center gap-1">🔒 Confidential VDR Asset</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span>🎮</span> Interactive Architectural Simulator
+                    </h3>
+                    <p class="text-sm text-slate-400">Referencing "image_8f84d3.png" — Run programmatic events and watch the state transitions execute.</p>
+                </div>
+                <button id="reset-button" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-4 py-2 rounded-xl text-sm font-medium border border-slate-700 transition duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+                    </svg>
+                    Reset Engine State
+                </button>
+            </div>
+
+            <!-- Main Grid: Flowchart Canvas, Control Deck, Console Logs -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <!-- COLUMN 1 & 2: THE FLOWCHART CANVAS & CONTROL DECK -->
+                <div class="xl:col-span-2 space-y-6">
+                    
+                    <!-- THE STATE MACHINE GRAPHICS CANVAS -->
+                    <div class="bg-[#0f1422] border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[500px]">
+                        
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
+                            <span class="text-xs font-mono text-slate-400">VISUAL STATE INTERCONNECTS</span>
+                            <div class="flex items-center space-x-4 text-xs">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandBlue inline-block animate-pulse"></span> Active</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandOrange inline-block"></span> Triage/Awaiting</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-brandEmerald inline-block"></span> Terminal State</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Diagram Container -->
+                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center justify-center py-6 relative">
+                            
+                            <!-- STATE 1: INITIALIZATION -->
+                            <div id="state-INITIALIZATION" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">STATE 01</span>
+                                    <span class="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">INITIAL</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">INITIALIZATION</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Open Banking authorization layer holds contract handshake.</p>
+                                <div class="mt-2 text-[10px] font-semibold text-brandBlue flex items-center justify-between">
+                                    <span>Locked Funds</span>
+                                    <span id="state-val-01">$0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- STATE 2: PRE-FULFILLMENT -->
+                            <div id="state-PRE-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">STATE 02</span>
+                                    <span id="timer-badge-delivery" class="text-[10px] bg-brandOrange/20 text-brandOrange border border-brandOrange/30 px-1.5 py-0.5 rounded font-mono hidden">TR_DELIVERY</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">PRE-FULFILLMENT</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Buyer has authorized funds. Delivery Timer starts.</p>
+                                <div class="mt-2 text-xs flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-500">Timer Remainder</span>
+                                    <span id="countdown-delivery" class="font-mono text-brandOrange font-bold">-</span>
+                                </div>
+                            </div>
+
+                            <!-- STATE 3: POST-FULFILLMENT -->
+                            <div id="state-POST-FULFILLMENT" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">STATE 03</span>
+                                    <span id="timer-badge-inspection" class="text-[10px] bg-brandBlue/20 text-brandBlue border border-brandBlue/30 px-1.5 py-0.5 rounded font-mono hidden">TR_INSPECTION</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">POST-FULFILLMENT</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Fulfillment verified. Inspection & Rejection engines active.</p>
+                                <div class="mt-2 text-xs flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-500">Inspection Time</span>
+                                    <span id="countdown-inspection" class="font-mono text-brandBlue font-bold">-</span>
+                                </div>
+                            </div>
+
+                            <!-- STATE 4: DISPUTE TRIAGE -->
+                            <div id="state-DISPUTE-TRIAGE" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">STATE 05</span>
+                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono">TR_REJECTION</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">DISPUTE TRIAGE</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">Escalated logic path. Frozen ledger split or arbitration loop.</p>
+                                <div class="mt-2 text-xs flex items-center justify-between">
+                                    <span id="triage-badge" class="text-[10px] text-brandRed font-semibold uppercase">Green Zone Active</span>
+                                </div>
+                            </div>
+
+                            <!-- STATE 5: AUTO-CANCELLED (TERMINAL) -->
+                            <div id="state-AUTO-CANCELLED" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">TERMINAL</span>
+                                    <span class="text-[10px] bg-brandRed/20 text-brandRed border border-brandRed/30 px-1.5 py-0.5 rounded font-mono">CANCELLED</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">AUTO-CANCELLED</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">100% fund reversion triggered. Ledger clean-close payload dispatched.</p>
+                                <div class="mt-2 text-[10px] text-slate-500">Code: EXPIRED_DELIVERY</div>
+                            </div>
+
+                            <!-- STATE 6: SETTLED (TERMINAL) -->
+                            <div id="state-SETTLED" class="border border-slate-800 bg-brandDark/50 p-5 rounded-2xl flex flex-col justify-between h-36 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] font-mono text-slate-500">TERMINAL</span>
+                                    <span class="text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono">SETTLED</span>
+                                </div>
+                                <h4 class="font-bold text-sm text-white mt-2">SETTLED</h4>
+                                <p class="text-[11px] text-slate-400 mt-1">API payload clears transaction to verified partner bank rails.</p>
+                                <div class="mt-2 text-[10px] text-brandEmerald font-bold">TRANSACTION COMPLETE</div>
+                            </div>
+
+                        </div>
+
+                        <!-- Technical State Indicator Footer -->
+                        <div class="border-t border-slate-800/80 pt-3 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+                            <div>Current Engine State: <span id="current-state-indicator" class="font-mono text-brandBlue font-semibold">INITIALIZATION</span></div>
+                            <div>Last Event Trigger: <span id="last-event-indicator" class="font-mono text-slate-400">NONE</span></div>
+                        </div>
+
+                    </div>
+
+                    <!-- THE SIMULATOR CONTROL DECK -->
+                    <div class="bg-brandSlate/30 border border-slate-800 rounded-2xl p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
+                                <span>⚡</span> Open Banking API Webhook Controls
+                            </h4>
+                            <span class="text-xs text-slate-500">Interactive Inputs</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            <!-- Init Trigger -->
+                            <button id="btn-buyer-pays" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandBlue/50 text-left transition duration-200 group">
+                                <span class="text-[10px] text-brandBlue font-mono uppercase mb-1">API Webhook</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandBlue transition">Buyer Authorizes Deposit</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Simulates buyer paying $1,500 into ring-fenced node ledger.</span>
+                            </button>
+                            
+                            <!-- Delivery Logged Trigger -->
+                            <button id="btn-courier-delivers" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandIndigo/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandIndigo font-mono uppercase mb-1">Logistics API Webhook</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandIndigo transition">Courier Inputs OTP</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Simulates parcel delivery event via GIG Logistics API.</span>
+                            </button>
+
+                            <!-- Timeout Delivery Trigger -->
+                            <button id="btn-delivery-timeout" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandRed/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandRed font-mono uppercase mb-1">Chronological Gate</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandRed transition">Simulate Delivery Timeout</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Forces TR_DELIVERY time expiry. Standard: 72 hours.</span>
+                            </button>
+
+                            <!-- Buyer Approves Trigger -->
+                            <button id="btn-buyer-approves" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandEmerald/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandEmerald font-mono uppercase mb-1">User Front-End Action</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Buyer Approves Cargo</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Instantly bypasses TR_INSPECTION timer directly to payout.</span>
+                            </button>
+
+                            <!-- Buyer Rejects/Dispute Trigger -->
+                            <button id="btn-buyer-rejects" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandOrange/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandOrange font-mono uppercase mb-1">User Dispute API</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandOrange transition">Buyer Submits Rejection</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Freezes ledger and triggers Traffic-Light Dispute workflow.</span>
+                            </button>
+
+                            <!-- Resolve Dispute Trigger -->
+                            <button id="btn-resolve-dispute" class="flex flex-col items-start p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brandIndigo/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[10px] text-brandIndigo font-mono uppercase mb-1">Compliance Module</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandIndigo transition">Resolve Dispute</span>
+                                <span class="text-[10px] text-slate-500 mt-1">Executes payout routing to close out the arbitration tree.</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUMN 3: ENGINE LOGS & OPEN BANKING PAYLOAD -->
+                <div class="space-y-6">
+                    
+                    <!-- DYNAMIC ENGINE LOGS -->
+                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between h-[340px]">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                            <span class="text-xs font-mono font-bold text-slate-400">ENGINE EVENT LOG</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-brandBlue animate-pulse"></span>
+                        </div>
+                        
+                        <div id="log-console" class="flex-grow font-mono text-xs text-brandBlue overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                            <!-- Logs dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- PROGRAMMATIC OPEN BANKING PAYLOAD ENGINE -->
+                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-[280px]">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                            <span class="text-xs font-mono font-bold text-slate-400">API ROUTING PAYLOAD (JSON)</span>
+                            <button id="copy-payload" class="text-xs text-slate-500 hover:text-white flex items-center gap-1 transition">
+                                📁 Copy
+                            </button>
+                        </div>
+                        <div class="flex-grow bg-brandDark/80 rounded-xl p-3 border border-slate-800/80 font-mono text-[11px] text-slate-300 overflow-x-auto select-all">
+                            <pre id="payload-content">
+{
+  "contract_ref": "TP-8F84-2026",
+  "status": "INITIALIZATION",
+  "amount_fiat": 0,
+  "bank_holding": "Zenith Bank PLC",
+  "escrow_locked": false,
+  "routing_action": "HOLD_AUTHORIZED"
+}
+                            </pre>
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-2 italic text-right">
+                            *Auto-generated based on simulator active node.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                <span>📑</span> Technical Q&A Architecture Guide
+            </h3>
+            
+            <div class="space-y-4">
+                
+                <!-- Q1 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-1')">
+                        <span class="font-bold text-base text-slate-200">Q1: What is the fundamental difference between a "Traditional Escrow Wallet" and our "State Machine" architecture?</span>
+                        <span id="icon-qa-1" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-1" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-red-500/5 border border-red-500/10 p-5 rounded-xl">
+                                <h5 class="text-sm font-bold text-brandRed uppercase tracking-wider mb-2">The Old Way (Traditional Escrow)</h5>
+                                <p class="text-xs text-slate-400 mb-3">
+                                    <strong>Concept:</strong> A static bank vault.
+                                </p>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                    Execution: Money sits in a database until a human support agent manually reviews chat logs, checks shipping receipts, and clicks a button to release funds.
+                                </p>
+                                <div class="font-mono text-[10px] text-brandRed bg-brandRed/10 p-2.5 rounded border border-brandRed/20">
+                                    [TRADITIONAL FLOW]<br/>
+                                    User Action ──► Human Review ──► Manual Database Update ──► Payout
+                                </div>
+                            </div>
+                            <div class="bg-brandEmerald/5 border border-brandEmerald/10 p-5 rounded-xl">
+                                <h5 class="text-sm font-bold text-brandEmerald uppercase tracking-wider mb-2">The New Way (Our State Machine)</h5>
+                                <p class="text-xs text-slate-400 mb-3">
+                                    <strong>Concept:</strong> An event-driven logic engine.
+                                </p>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                    Execution: The transaction moves through explicit states (e.g., INITIALIZED → PENDING_DELIVERY → INSPECTION → SETTLED). Transitions are triggered exclusively by API webhooks or chronological countdowns (Redis-backed timers).
+                                </p>
+                                <div class="font-mono text-[10px] text-brandEmerald bg-brandEmerald/10 p-2.5 rounded border border-brandEmerald/20">
+                                    [STATE MACHINE FLOW]<br/>
+                                    API Webhook / Timer Expiration ──► State Transition ──► Programmatic API Payout
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">
+                            <strong>Result:</strong> If a timer hits zero, the system executes a hardcoded default action automatically. 99% of transactions require zero human intervention, insulating operational margins as transaction density scales.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-2')">
+                        <span class="font-bold text-base text-slate-200">Q2: What exactly are "Cooling Periods" and "Activity Timers"?</span>
+                        <span id="icon-qa-2" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-2" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            They are chronological logic gates. They prevent money from getting stuck in system limbo (float) and force counterparties to take action. Think of them as self-executing smart contracts governed by time.
+                        </p>
+                        <!-- Mobile Responsive Table -->
+                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-900 border-b border-slate-800">
+                                        <th class="p-3 text-slate-300 font-bold uppercase">Timer Variable</th>
+                                        <th class="p-3 text-slate-300 font-bold uppercase">Trigger Event</th>
+                                        <th class="p-3 text-slate-300 font-bold uppercase">Duration Parameters</th>
+                                        <th class="p-3 text-slate-300 font-bold uppercase">Programmatic Action on Expiration</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/80">
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-3 font-mono text-brandOrange font-semibold">TR_DELIVERY</td>
+                                        <td class="p-3 text-slate-400">Buyer Payment Cleared</td>
+                                        <td class="p-3 text-slate-400">72h (Goods) / 120h (Services)</td>
+                                        <td class="p-3 text-brandRed font-semibold">Auto-cancels deal. Reverts 100% of funds to buyer wallet via API.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-3 font-mono text-brandBlue font-semibold">TR_INSPECTION</td>
+                                        <td class="p-3 text-slate-400">Courier Webhook / OTP</td>
+                                        <td class="p-3 text-slate-400">24h (Goods) / 48h (Services)</td>
+                                        <td class="p-3 text-brandEmerald font-semibold">Auto-approves delivery. Fires the Payment Timer.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-3 font-mono text-brandRed font-semibold">TR_REJECTION</td>
+                                        <td class="p-3 text-slate-400">Buyer Logs a Dispute</td>
+                                        <td class="p-3 text-slate-400">48-Hour Buffer</td>
+                                        <td class="p-3 text-slate-400">Freezes ledger slice. Routes payload to Dispute Triage API.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-3 font-mono text-brandEmerald font-semibold">TR_PAYMENT</td>
+                                        <td class="p-3 text-slate-400">Inspection Cleared</td>
+                                        <td class="p-3 text-slate-400">Instantaneous</td>
+                                        <td class="p-3 text-brandEmerald font-semibold">Executes settlement payload to Partner Bank Open Banking API.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-3')">
+                        <span class="font-bold text-base text-slate-200">Q3: Why is the TR_DELIVERY timer completely isolated from the others?</span>
+                        <span id="icon-qa-3" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-3" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            The Delivery Timer (<code class="font-mono text-brandOrange">TR_DELIVERY</code>) is our **Pre-Delivery Safety Valve**. It is the only timer active immediately after payment authorization.
+                        </p>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Its sole technical purpose is to kill abandoned transactions. If a seller ghosts the buyer and fails to provide a verified shipping update before this timer expires, the contract self-destructs.
+                        </p>
+                        <p class="text-xs text-brandIndigo font-semibold border-l-2 border-brandIndigo pl-3">
+                            Why this matters: It ensures we never exceed our 14-day absolute maximum system float. This keeps our partner bank ledgers perfectly clean and prevents buyer funds from being locked down by non-responsive sellers.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-4')">
+                        <span class="font-bold text-base text-slate-200">Q4: How does the system know when to trigger the Post-Delivery Verification phase?</span>
+                        <span id="icon-qa-4" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-4" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            The <code class="font-mono text-brandBlue">TR_INSPECTION</code> and <code class="font-mono text-brandRed">TR_REJECTION</code> timers are completely dead/inactive until the exact moment an authenticated delivery event is logged.
+                        </p>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            We do not rely on sellers clicking "I shipped it." We rely on direct third-party API integrations (such as a **GIG Logistics API** or **DHL Webhook**). When the courier inputs the One-Time Password (OTP) or delivery code at the buyer's doorstep, the logistics platform triggers a webhook payload directly into our state machine. That specific event-trigger instantly destroys the <code class="font-mono text-brandOrange">TR_DELIVERY</code> timer and ignites the <code class="font-mono text-brandBlue">TR_INSPECTION</code> timer.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-5')">
+                        <span class="font-bold text-base text-slate-200">Q5: How does the "Traffic-Light Dispute Triage" function as a state without blowing up operational costs?</span>
+                        <span id="icon-qa-5" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-5" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-6">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            When a buyer rejects an item, the state transitions to <code class="font-mono">DISPUTE_TRIAGE</code> and the <code class="font-mono">TR_REJECTION</code> timer triggers. To defend platform profitability, we isolate resolution workflows into a self-filtering hierarchy:
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Tier 1 -->
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-mono font-bold text-brandEmerald">TIER 1 (GREEN)</span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-brandEmerald"></span>
+                                    </div>
+                                    <h6 class="font-bold text-sm text-white mb-2">Decentralized Chat</h6>
+                                    <p class="text-xs text-slate-400 leading-relaxed">
+                                        Counterparties have 72 hours inside a sandbox-isolated chat UI to select an auto-settlement template (e.g., partial refund or return). Zero internal admin hours spent.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Tier 2 -->
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-mono font-bold text-brandOrange">TIER 2 (ORANGE)</span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-brandOrange"></span>
+                                    </div>
+                                    <h6 class="font-bold text-sm text-white mb-2">Admin Recommendation</h6>
+                                    <p class="text-xs text-slate-400 leading-relaxed">
+                                        A platform arbitrator reviews the dispute logs and issues a Recommended Resolution. **Key Automation:** If users do not actively reject or pay to escalate, the recommendation auto-executes on expiry.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Tier 3 -->
+                            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-mono font-bold text-brandRed">TIER 3 (RED)</span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-brandRed"></span>
+                                    </div>
+                                    <h6 class="font-bold text-sm text-white mb-2">Parametric Arbitration</h6>
+                                    <p class="text-xs text-slate-400 leading-relaxed">
+                                        Transacting parties must absorb an upfront escalation/arbitration fee to advance. This fee fully offsets our high-tier manual compliance and audit review operations.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-6')">
+                        <span class="font-bold text-base text-slate-200">Q6: How does this state machine interact with actual fiat currency?</span>
+                        <span id="icon-qa-6" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-6" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            TrustedPayer operates a strict **Non-Custodial Open Banking integration model**. We do not touch, hold, or store the fiat currency directly.
+                        </p>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            100% of transaction capital sits safely inside co-branded, ring-fenced nodal trust accounts at our commercial partner banks (e.g., Zenith Bank PLC). Our API backend functions as the absolute programmatic orchestrator.
+                        </p>
+                        <p class="text-xs text-brandBlue font-semibold border-l-2 border-brandBlue pl-3">
+                            When a settlement condition is met (like the TR_PAYMENT timer firing), our transaction ledger compiles a cryptographic payload. This payload instructs the banking infrastructure to run instant, intra-bank clearings to the verified merchant node.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-800/80 bg-brandDark py-10 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-semibold text-slate-400 uppercase tracking-wider">TrustedPayer Intermediary Services Ltd.</p>
+            <p>Document Identity: TP-OPS-STATE-003 • Confident VDR Asset</p>
+            <p class="text-[10px] text-slate-600">Built for institutional due diligence and regulatory compliance.</p>
+        </div>
+    </footer>
+
+    <script>
+        // State Definitions
+        const STATES = {
+            INITIALIZATION: 'INITIALIZATION',
+            PRE_FULFILLMENT: 'PRE-FULFILLMENT',
+            POST_FULFILLMENT: 'POST-FULFILLMENT',
+            DISPUTE_TRIAGE: 'DISPUTE-TRIAGE',
+            AUTO_CANCELLED: 'AUTO-CANCELLED',
+            SETTLED: 'SETTLED'
+        };
+
+        // UI Event Logs helper
+        const logConsole = document.getElementById('log-console');
+        function addLog(message, type = 'system') {
+            const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+            let colorClass = 'text-brandBlue';
+            let icon = '⚙️';
+            if (type === 'webhook') { colorClass = 'text-brandIndigo'; icon = '🔌'; }
+            if (type === 'error') { colorClass = 'text-brandRed'; icon = '⚠️'; }
+            if (type === 'success') { colorClass = 'text-brandEmerald'; icon = '✅'; }
+            if (type === 'timer') { colorClass = 'text-brandOrange'; icon = '⏱️'; }
+
+            const logItem = document.createElement('div');
+            logItem.className = `flex items-start gap-1.5 leading-relaxed py-0.5 ${colorClass}`;
+            logItem.innerHTML = `<span class="text-slate-600 shrink-0 font-semibold">[${timestamp}]</span> <span>${icon} ${message}</span>`;
+            
+            logConsole.appendChild(logItem);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        }
+
+        // State & Timer Variables
+        let currentState = STATES.INITIALIZATION;
+        let lastEvent = 'ENGINE_INITIALIZED';
+        let contractAmount = 0.00;
+        let activeTimer = null;
+        let timerSecondsLeft = 0;
+
+        // Visual DOM element arrays
+        const cardElements = {
+            [STATES.INITIALIZATION]: document.getElementById('state-INITIALIZATION'),
+            [STATES.PRE_FULFILLMENT]: document.getElementById('state-PRE-FULFILLMENT'),
+            [STATES.POST_FULFILLMENT]: document.getElementById('state-POST-FULFILLMENT'),
+            [STATES.DISPUTE_TRIAGE]: document.getElementById('state-DISPUTE-TRIAGE'),
+            [STATES.AUTO_CANCELLED]: document.getElementById('state-AUTO-CANCELLED'),
+            [STATES.SETTLED]: document.getElementById('state-SETTLED'),
+        };
+
+        const buttons = {
+            pays: document.getElementById('btn-buyer-pays'),
+            delivers: document.getElementById('btn-courier-delivers'),
+            deliveryTimeout: document.getElementById('btn-delivery-timeout'),
+            approves: document.getElementById('btn-buyer-approves'),
+            rejects: document.getElementById('btn-buyer-rejects'),
+            resolve: document.getElementById('btn-resolve-dispute'),
+        };
+
+        // Setup active timers badges & displays
+        const timerBadgeDelivery = document.getElementById('timer-badge-delivery');
+        const timerBadgeInspection = document.getElementById('timer-badge-inspection');
+        const countdownDelivery = document.getElementById('countdown-delivery');
+        const countdownInspection = document.getElementById('countdown-inspection');
+
+        // Copy Payload Feature
+        document.getElementById('copy-payload').addEventListener('click', function() {
+            const payloadCode = document.getElementById('payload-content').innerText;
+            // Use fallback browser copy for compatibility within safe limits
+            const el = document.createElement('textarea');
+            el.value = payloadCode;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            addLog("JSON Payload copied to clipboard", 'success');
+        });
+
+        // Toggle Q&A Accordion
+        function toggleAccordion(id) {
+            const panel = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                panel.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Clear timer interval
+        function clearActiveTimers() {
+            if (activeTimer) {
+                clearInterval(activeTimer);
+                activeTimer = null;
+            }
+            timerSecondsLeft = 0;
+            countdownDelivery.innerText = '-';
+            countdownInspection.innerText = '-';
+            timerBadgeDelivery.classList.add('hidden');
+            timerBadgeInspection.classList.add('hidden');
+        }
+
+        // Live JSON payload preview generator
+        function updatePayloadPreview() {
+            const payloadContent = document.getElementById('payload-content');
+            let actionText = "HOLD_AUTHORIZED";
+            if (currentState === STATES.PRE_FULFILLMENT) actionText = "AWAITING_COURIER_WEBHOOK";
+            if (currentState === STATES.POST_FULFILLMENT) actionText = "INSPECTION_WINDOW_ACTIVE";
+            if (currentState === STATES.DISPUTE_TRIAGE) actionText = "LOCK_LEDGER_SLICE";
+            if (currentState === STATES.AUTO_CANCELLED) actionText = "REVERT_100_PERCENT";
+            if (currentState === STATES.SETTLED) actionText = "EXECUTE_OPEN_BANKING_DISPATCH";
+
+            const payloadData = {
+                contract_ref: "TP-8F84-2026",
+                status: currentState,
+                amount_fiat: contractAmount,
+                bank_holding: "Zenith Bank PLC",
+                escrow_locked: (currentState === STATES.PRE_FULFILLMENT || currentState === STATES.POST_FULFILLMENT || currentState === STATES.DISPUTE_TRIAGE),
+                routing_action: actionText,
+                event_hash: "0x" + Math.floor(Math.random() * 1000000).toString(16).toUpperCase()
+            };
+
+            payloadContent.innerText = JSON.stringify(payloadData, null, 2);
+        }
+
+        // UI state update function
+        function setEngineState(targetState, eventTriggerName) {
+            currentState = targetState;
+            lastEvent = eventTriggerName;
+
+            // Log parameters
+            document.getElementById('current-state-indicator').innerText = currentState;
+            document.getElementById('last-event-indicator').innerText = lastEvent;
+
+            // Reset CSS classes across all nodes
+            Object.values(cardElements).forEach(el => {
+                el.classList.remove('active-blue', 'active-orange', 'active-emerald', 'active-red');
+                el.style.transform = 'scale(1)';
+            });
+
+            // Highlight new active node with dynamic pulse
+            const activeEl = cardElements[currentState];
+            if (currentState === STATES.INITIALIZATION) {
+                activeEl.classList.add('active-blue');
+            } else if (currentState === STATES.PRE_FULFILLMENT) {
+                activeEl.classList.add('active-orange');
+            } else if (currentState === STATES.POST_FULFILLMENT) {
+                activeEl.classList.add('active-blue');
+            } else if (currentState === STATES.DISPUTE_TRIAGE) {
+                activeEl.classList.add('active-red');
+            } else if (currentState === STATES.AUTO_CANCELLED) {
+                activeEl.classList.add('active-red');
+            } else if (currentState === STATES.SETTLED) {
+                activeEl.classList.add('active-emerald');
+            }
+            activeEl.style.transform = 'scale(1.03)';
+
+            // Control Trigger Button Enable/Disable Matrix
+            Object.values(buttons).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            if (currentState === STATES.INITIALIZATION) {
+                buttons.pays.disabled = false;
+                buttons.pays.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentState === STATES.PRE_FULFILLMENT) {
+                buttons.delivers.disabled = false;
+                buttons.delivers.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.deliveryTimeout.disabled = false;
+                buttons.deliveryTimeout.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentState === STATES.POST_FULFILLMENT) {
+                buttons.approves.disabled = false;
+                buttons.approves.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.rejects.disabled = false;
+                buttons.rejects.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentState === STATES.DISPUTE_TRIAGE) {
+                buttons.resolve.disabled = false;
+                buttons.resolve.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            // Fire logger & visual adjustments
+            addLog(`State updated to: [${currentState}]`, 'success');
+            updatePayloadPreview();
+        }
+
+        // TRIGGER EVENTS EXECUTION
+        
+        // 1. Buyer Paid
+        buttons.pays.addEventListener('click', function() {
+            contractAmount = 1500.00;
+            document.getElementById('state-val-01').innerText = "$1,500.00";
+            addLog("Webhook: open_banking_auth_cleared received.", 'webhook');
+            addLog("Ledger command: lock_funds_node ($1,500.00) completed.", 'system');
+            setEngineState(STATES.PRE_FULFILLMENT, 'BUYER_PAYMENT_CLEARED');
+            
+            // Activate Simulated TR_DELIVERY Countdown
+            clearActiveTimers();
+            timerSecondsLeft = 15; // Accelerating 72h down to 15 seconds
+            timerBadgeDelivery.classList.remove('hidden');
+            addLog("Clock trigger: TR_DELIVERY initialized (72 Hour Window).", 'timer');
+
+            activeTimer = setInterval(() => {
+                timerSecondsLeft--;
+                countdownDelivery.innerText = `${timerSecondsLeft}s remaining`;
+                if (timerSecondsLeft <= 0) {
+                    clearActiveTimers();
+                    addLog("Clock trigger: TR_DELIVERY expired.", 'timer');
+                    executeAutoCancel();
+                }
+            }, 1000);
+        });
+
+        // 2. Courier Delivers (OTP Webhook)
+        buttons.delivers.addEventListener('click', function() {
+            addLog("Webhook: gig_logistics_otp_verify received.", 'webhook');
+            clearActiveTimers();
+            setEngineState(STATES.POST_FULFILLMENT, 'COURIER_DELIVERY_CONFIRMED');
+
+            // Activate Simulated TR_INSPECTION Countdown
+            timerSecondsLeft = 20; // 48h down to 20 seconds
+            timerBadgeInspection.classList.remove('hidden');
+            addLog("Clock trigger: TR_INSPECTION initialized (48 Hour Window).", 'timer');
+
+            activeTimer = setInterval(() => {
+                timerSecondsLeft--;
+                countdownInspection.innerText = `${timerSecondsLeft}s remaining`;
+                if (timerSecondsLeft <= 0) {
+                    clearActiveTimers();
+                    addLog("Clock trigger: TR_INSPECTION expired without dispute.", 'timer');
+                    executeSettlement();
+                }
+            }, 1000);
+        });
+
+        // 3. Simulated Delivery Timeout
+        buttons.deliveryTimeout.addEventListener('click', function() {
+            clearActiveTimers();
+            addLog("Simulator Action: Force Delivery Timeout.", 'error');
+            executeAutoCancel();
+        });
+
+        // 4. Buyer Approves
+        buttons.approves.addEventListener('click', function() {
+            addLog("Action: Buyer approves delivery explicitly via app portal.", 'system');
+            clearActiveTimers();
+            executeSettlement();
+        });
+
+        // 5. Buyer Rejects / Raise Dispute
+        buttons.rejects.addEventListener('click', function() {
+            addLog("Action: Buyer raised dispute ticket 'Item Significantly Not As Described'.", 'error');
+            clearActiveTimers();
+            setEngineState(STATES.DISPUTE_TRIAGE, 'DISPUTE_INITIATED');
+            addLog("Ledger command: freeze_ledger_slice activated. Escrow funds locked.", 'system');
+        });
+
+        // 6. Dispute Resolution (Tiers 1-3)
+        buttons.resolve.addEventListener('click', function() {
+            addLog("Action: Mediation template approved by counterparties.", 'system');
+            executeSettlement();
+        });
+
+        // Auto Cancel Execution
+        function executeAutoCancel() {
+            addLog("Ledger command: reverse_buyer_deposits initiated.", 'system');
+            addLog("Settlement payload executed to Open Banking rails. Returning $1,500.00.", 'success');
+            setEngineState(STATES.AUTO_CANCELLED, 'TR_DELIVERY_EXPIRED');
+        }
+
+        // Settlement Execution
+        function executeSettlement() {
+            addLog("Clock trigger: TR_PAYMENT fired instantaneously.", 'timer');
+            addLog("Ledger command: compile_settlement_payload.", 'system');
+            addLog("Settlement payload successfully pushed to Zenith Bank API.", 'success');
+            setEngineState(STATES.SETTLED, 'FUNDS_SETTLED_TO_SELLER');
+        }
+
+        // Restart State Machine
+        document.getElementById('reset-button').addEventListener('click', function() {
+            clearActiveTimers();
+            contractAmount = 0.00;
+            document.getElementById('state-val-01').innerText = "$0.00";
+            logConsole.innerHTML = "";
+            addLog("System event: reset_engine_state invoked.", 'system');
+            addLog("Engine Ready. Awaiting Open Banking handshakes...", 'system');
+            setEngineState(STATES.INITIALIZATION, 'ENGINE_RESET');
+        });
+
+        // Window Onload Initialization
+        window.onload = function() {
+            addLog("System event: initialization_sequence loaded.", 'system');
+            addLog("Connecting to co-branded nodal API registers...", 'system');
+            addLog("Engine Ready. Awaiting Open Banking handshakes...", 'system');
+            setEngineState(STATES.INITIALIZATION, 'ENGINE_READY');
+        }
+    </script>
+</body>
+</html>
