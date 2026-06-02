@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Logic Gates - Specification & Architecture Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme: 'neutral'});</script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f4f6f8;
+        }
+        .document-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 6px solid #0056b3;
+        }
+        h1 {
+            color: #0056b3;
+            font-size: 24px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #444;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .diagram-wrapper {
+            background-color: #fafbfc;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #0056b3;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-container">
+    <h1>DOCUMENT 1: TIMER LOGIC GATES — SPECIFICATION & ARCHITECTURE DIAGRAM</h1>
+    
+    <h2>1. System State Transition Flowchart</h2>
+    <div class="diagram-wrapper">
+        <div class="mermaid">
+        graph TD
+            %% Styling definitions
+            classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#333;
+            classDef initialize fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
+            classDef timer fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100;
+            classDef danger fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#b71c1c;
+            classDef success fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#1b5e20;
+            classDef action fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c;
+
+            A[DEAL CREATION & ESCROW PAYMENT]:::initialize --> B(Initialize Delivery Timer<br/>Pre-Delivery Safety Valve):::timer
+            
+            B -->|Seller Non-Responsive /<br/>Max Float Boundary Met| C[Programmatic Auto-Cancellation]:::danger
+            C --> D((100% Fund Reversion<br/>to Buyer Wallet)):::danger
+            
+            B -->|Seller Confirms Shipping / API Webhook| E[ITEM / SERVICE DELIVERED]:::initialize
+            
+            E --> F{Post-Delivery Verification}
+            
+            F -->|Logistics Courier OTP| G(Inspection Timer<br/>Buyer Validation):::timer
+            F -->|Dispute Initiated| H(Rejection Timer<br/>Dispute Window):::danger
+            
+            H --> I[Freeze Wallet<br/>Route to Triage Engine]:::action
+            
+            G -->|Verification Passed /<br/>Countdown Expiration| J(Payment Timer):::timer
+            I -->|Dispute Resolved /<br/>Admin Ruling| J
+            
+            J --> K((API Settlement Execution<br/>Funds Cleared to Seller)):::success
+        </div>
+    </div>
+
+    <h2>2. Programmatic Timer Configuration Matrix</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Timer Core Identifier</th>
+                <th>Trigger Lifecycle Event</th>
+                <th>Category Classification</th>
+                <th>Default Expiry Target</th>
+                <th>Automated Hard-Stop Action Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>TR_DELIVERY_PROD</strong></td>
+                <td>Deal Paid/Authorized</td>
+                <td>Physical Retail Goods</td>
+                <td>72 Hours</td>
+                <td>Cancel Deal; Revert 100% to Buyer</td>
+            </tr>
+            <tr>
+                <td><strong>TR_DELIVERY_SERV</strong></td>
+                <td>Deal Paid/Authorized</td>
+                <td>Professional Services</td>
+                <td>120 Hours</td>
+                <td>Cancel Deal; Revert 100% to Buyer</td>
+            </tr>
+            <tr>
+                <td><strong>TR_DELIVERY_HVT</strong></td>
+                <td>Deal Paid/Authorized</td>
+                <td>High-Value Trade (HVT)</td>
+                <td>240 Hours</td>
+                <td>Escalation to Tier 3 Isolation</td>
+            </tr>
+            <tr>
+                <td><strong>TR_INSPECTION_PROD</strong></td>
+                <td>Logistics Courier OTP</td>
+                <td>Physical Retail Goods</td>
+                <td>24 Hours</td>
+                <td>Auto-Approve; Fire Payment Timer</td>
+            </tr>
+            <tr>
+                <td><strong>TR_INSPECTION_SERV</strong></td>
+                <td>Milestone Sign-off</td>
+                <td>Professional Services</td>
+                <td>48 Hours</td>
+                <td>Auto-Approve; Fire Payment Timer</td>
+            </tr>
+            <tr>
+                <td><strong>TR_REJECTION_DISP</strong></td>
+                <td>Dispute Initiated</td>
+                <td>Cross-Category</td>
+                <td>48 Hours</td>
+                <td>Freeze Wallet; Route to Triage</td>
+            </tr>
+            <tr>
+                <td><strong>TR_PAYMENT_SETTLE</strong></td>
+                <td>Inspection Cleared</td>
+                <td>Cross-Category</td>
+                <td>Instantaneous</td>
+                <td>Execute API Bank Settlement Rails</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p><strong>TRUSTEDPAYER INTERMEDIARY SERVICES LTD.</strong></p>
+        <p>Document Identity: TP-OPS-ARCH-001 | Confidential Virtual Data Room (VDR) Asset</p>
+    </div>
+</div>
+
+</body>
+</html>
