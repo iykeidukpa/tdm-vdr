@@ -242,16 +242,16 @@
                                 <div class="mt-2 text-[9px] text-slate-500">Code: TERM_REVERTED</div>
                             </div>
 
-                            <!-- STATE 7: SETTLED (TERMINAL / COOLING) -->
+                            <!-- STATE 7: SETTLED IN ESCROW WALLET (TERMINAL / COOLING) -->
                             <div id="state-SETTLED" class="border border-slate-800 bg-brandDark/50 p-4 rounded-xl flex flex-col justify-between h-36 transition-all duration-300 col-span-1 md:col-span-2">
                                 <div class="flex justify-between items-start">
                                     <span class="text-[10px] font-mono text-slate-500">SETTLEMENT</span>
                                     <span id="settled-badge" class="text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold">SETTLED</span>
                                 </div>
-                                <h4 id="settled-title" class="font-bold text-xs text-white mt-2">SETTLED</h4>
-                                <p id="settled-desc" class="text-[10px] text-slate-400 mt-1">API settlement payload fires and resolves transaction loops securely.</p>
+                                <h4 id="settled-title" class="font-bold text-xs text-white mt-2">SETTLED IN WALLET</h4>
+                                <p id="settled-desc" class="text-[10px] text-slate-400 mt-1">Funds settled to proprietary banking partner wallet node. Lien released.</p>
                                 <div class="mt-2 text-xs flex items-center justify-between gap-2">
-                                    <span id="settled-status" class="text-[10px] text-brandEmerald font-bold tracking-wider">PAYMENT CLEARED</span>
+                                    <span id="settled-status" class="text-[10px] text-brandEmerald font-bold tracking-wider">LEDGER UNLOCKED</span>
                                     <span id="countdown-payment" class="font-mono text-brandOrange font-bold hidden text-xs">-</span>
                                 </div>
                             </div>
@@ -326,6 +326,35 @@
                                 <p class="text-[9px] text-slate-500 italic">Settlement cooling gate</p>
                             </div>
 
+                        </div>
+
+                        <!-- PROPRIETARY PARTNER LEDGER & WALLET OUTFLOW STATUS -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">🏦</span>
+                                    <span class="text-xs font-mono font-bold text-slate-300">PROPRIETARY WALLET LEDGER</span>
+                                </div>
+                                <span id="wallet-status-dot" class="w-2 h-2 rounded-full bg-slate-600"></span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs py-1">
+                                <div>
+                                    <p class="text-slate-500 text-[10px] uppercase font-bold">Lien Status</p>
+                                    <p id="ledger-lien-status" class="font-mono text-slate-300 font-semibold text-xs">NO_LIEN_ACTIVE</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-500 text-[10px] uppercase font-bold">Escrow Wallet Balance</p>
+                                    <p id="seller-wallet-balance" class="font-mono text-brandBlue font-extrabold text-sm">$0.00</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <button id="btn-execute-withdrawal" class="w-full flex items-center justify-center gap-2 bg-brandBlue hover:bg-brandBlue/90 text-white py-2 rounded-lg text-xs font-semibold opacity-50 cursor-not-allowed transition duration-200" disabled>
+                                        🔒 Verify & Withdraw
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-[9.5px] text-slate-500 italic leading-snug">
+                                *All payouts resolve to the seller's proprietary ledger node at our partner bank. Outbound withdrawals to personal external bank accounts undergo strict, automated transaction-matching and AML identity KYC checks.
+                            </p>
                         </div>
 
                         <div class="border-b border-slate-800 pb-3 pt-2">
@@ -423,7 +452,7 @@
                     </div>
 
                     <!-- PROGRAMMATIC OPEN BANKING PAYLOAD ENGINE -->
-                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-[300px]">
+                    <div class="bg-brandDark border border-slate-800 rounded-2xl p-5 flex flex-col justify-between min-h-[340px]">
                         <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
                             <span class="text-xs font-mono font-bold text-slate-400">API ROUTING PAYLOAD (JSON)</span>
                             <button id="copy-payload" class="text-xs text-slate-500 hover:text-white flex items-center gap-1 transition">
@@ -579,7 +608,7 @@
                     </button>
                     <div id="qa-4" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
                         <p class="text-sm text-slate-400 leading-relaxed">
-                            Instead of routing a rejecting buyer directly to manual dispute mediation (which increases human operational overhead), the state machine implements a intermediate **Rejection Reconciliation** state governed by the <code class="font-mono text-brandPurple">TR_REJECTION</code> timer.
+                            Instead of routing a rejecting buyer directly to manual dispute mediation (which increases human operational overhead), the state machine implements an intermediate **Rejection Reconciliation** state governed by the <code class="font-mono text-brandPurple">TR_REJECTION</code> timer.
                         </p>
                         <p class="text-sm text-slate-400 leading-relaxed">
                             This state functions as an interactive sandbox. The seller and buyer are given time to self-resolve issues (e.g. shipping missing parts, partial pricing refunds) under automated timing. The buyer can programmatically **Extend the Timer** up to 2 times within policy boundaries to provide extra reconciliation margins. If a resolution is agreed upon, the buyer accepts, automatically launching the `SETTLED` payment loop. If resolution fails, or if the timer expires, the system defaults directly to the `DISPUTE_TRIAGE` track.
@@ -660,6 +689,30 @@
                     </div>
                 </div>
 
+                <!-- Q7 -->
+                <div class="bg-brandSlate/10 border border-slate-800 rounded-2xl overflow-hidden">
+                    <button class="w-full text-left p-6 flex justify-between items-center hover:bg-slate-800/30 transition focus:outline-none" onclick="toggleAccordion('qa-7')">
+                        <span class="font-bold text-base text-slate-200">Q7: Why do we settle to a proprietary partner-bank wallet instead of directly to a user's standard bank account?</span>
+                        <span id="icon-qa-7" class="text-slate-500 text-lg transition-transform duration-200">▼</span>
+                    </button>
+                    <div id="qa-7" class="hidden border-t border-slate-800/80 p-6 bg-brandDark/40 space-y-4">
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Outflowing funds directly to arbitrary, external personal bank accounts creates massive operational and compliance exposure. If the transaction is under-disputed or flagged for suspicious activity, the platform has no ability to recall or lien un-cleared assets.
+                        </p>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            To secure absolute transaction integrity, **all successful state machine completions settle to a proprietary escrow wallet account** hosted natively inside our banking partner’s ring-fenced ledger. 
+                        </p>
+                        <p class="text-xs text-brandEmerald font-semibold border-l-2 border-brandEmerald pl-3 mb-2">
+                            Security Benefits of Proprietary Escrow Wallets:
+                        </p>
+                        <ul class="list-disc list-inside text-xs text-slate-400 space-y-2 leading-relaxed">
+                            <li><strong>Immutable Transaction Association:</strong> Every dollar in the wallet system remains strictly linked to an audited transaction ID hash, preventing unstructured cash flow and masking.</li>
+                            <li><strong>Fraud & AML Prevention:</strong> Outbound withdrawals from the partner escrow wallet to a personal bank account are protected by an automated identity-verification filter. If the external receiving account name doesn't match the verified KYC/UBO on our ledger, the transaction is locked.</li>
+                            <li><strong>Platform Lien Enforcement:</strong> This internal holding loop provides our compliance team with immediate, non-custodial, bank-backed clawback execution capabilities in high-threat scenarios before capital exits into the wild banking rails.</li>
+                        </ul>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -713,6 +766,10 @@
         let timerSecondsLeft = 0;
         let rejectionExtensionCount = 0; // Tracks buyer-asserted extensions
 
+        // Wallet Ledger State
+        let sellerWalletBalance = 0.00;
+        let lienStatus = 'NO_LIEN_ACTIVE'; // NO_LIEN_ACTIVE, ESCROW_LIEN_LOCKED, RELEASED_TO_WALLET, WITHDRAWN_TO_BANK
+
         // Default Configurable Durations
         let deliveryDuration = 15;      // Admin: TR_DELIVERY limit
         let inspectionDuration = 20;    // Admin: TR_INSPECTION limit
@@ -743,6 +800,7 @@
             reconcileCancel: document.getElementById('btn-reconcile-cancel'),
 
             resolve: document.getElementById('btn-resolve-dispute'),
+            withdraw: document.getElementById('btn-execute-withdrawal')
         };
 
         // Active timers badges & displays
@@ -771,6 +829,11 @@
         const disputeLabelMain = document.getElementById('reject-label-main');
         const disputeDescMain = document.getElementById('reject-desc-main');
         const extendBtnLabel = document.getElementById('extend-btn-label');
+
+        // Wallet Displays
+        const walletBalanceDisplay = document.getElementById('seller-wallet-balance');
+        const lienStatusDisplay = document.getElementById('ledger-lien-status');
+        const walletStatusDot = document.getElementById('wallet-status-dot');
 
         sliderDelivery.addEventListener('input', function() {
             deliveryDuration = parseInt(this.value);
@@ -860,7 +923,7 @@
             if (currentState === STATES.DISPUTE_TRIAGE) actionText = "LOCK_LEDGER_SLICE";
             if (currentState === STATES.AUTO_CANCELLED) actionText = "REVERT_100_PERCENT";
             if (currentState === STATES.SETTLED) {
-                actionText = sellerPaymentDuration > 0 && lastEvent === 'PAYMENT_PENDING' ? "PAYMENT_COOLING_HOLD" : "EXECUTE_OPEN_BANKING_DISPATCH";
+                actionText = sellerPaymentDuration > 0 && lastEvent === 'PAYMENT_PENDING' ? "PAYMENT_COOLING_HOLD" : "RELEASE_LIEN_TO_ESCROW_WALLET";
             }
 
             const payloadData = {
@@ -869,7 +932,10 @@
                 amount_fiat: contractAmount,
                 bank_holding: "Zenith Bank PLC",
                 escrow_locked: (currentState === STATES.PRE_FULFILLMENT || currentState === STATES.POST_FULFILLMENT || currentState === STATES.REJECTION_RECONCILIATION || currentState === STATES.DISPUTE_TRIAGE || (currentState === STATES.SETTLED && lastEvent === 'PAYMENT_PENDING')),
-                routing_action: actionText,
+                ledger_payout_destination: "PROPRIETARY_PARTNER_WALLET",
+                lien_status: lienStatus,
+                seller_wallet_balance_usd: sellerWalletBalance,
+                AML_compliance_status: (lienStatus === 'RELEASED_TO_WALLET' ? "READY_FOR_VERIFIED_WITHDRAWAL" : (lienStatus === 'WITHDRAWN_TO_BANK' ? "WITHDRAWAL_COMPLETE_IDENTITIES_MATCHED" : "LIEN_ENFORCED")),
                 admin_limits: {
                     tr_delivery_max: `${deliveryDuration * 4.8} Hours`,
                     tr_inspection_max: `${inspectionDuration * 2.4} Hours`,
@@ -886,6 +952,26 @@
             };
 
             payloadContent.innerText = JSON.stringify(payloadData, null, 2);
+        }
+
+        function updateWalletUI() {
+            walletBalanceDisplay.innerText = `$${sellerWalletBalance.toFixed(2)}`;
+            lienStatusDisplay.innerText = lienStatus;
+            
+            // Adjust visual indicators for wallet balance & lien status
+            if (lienStatus === 'NO_LIEN_ACTIVE') {
+                lienStatusDisplay.className = "font-mono text-slate-400 font-semibold text-xs";
+                walletStatusDot.className = "w-2 h-2 rounded-full bg-slate-600";
+            } else if (lienStatus === 'ESCROW_LIEN_LOCKED') {
+                lienStatusDisplay.className = "font-mono text-brandOrange font-bold text-xs animate-pulse";
+                walletStatusDot.className = "w-2 h-2 rounded-full bg-brandOrange animate-pulse";
+            } else if (lienStatus === 'RELEASED_TO_WALLET') {
+                lienStatusDisplay.className = "font-mono text-brandEmerald font-bold text-xs";
+                walletStatusDot.className = "w-2 h-2 rounded-full bg-brandEmerald";
+            } else if (lienStatus === 'WITHDRAWN_TO_BANK') {
+                lienStatusDisplay.className = "font-mono text-brandBlue font-bold text-xs";
+                walletStatusDot.className = "w-2 h-2 rounded-full bg-brandBlue";
+            }
         }
 
         function setEngineState(targetState, eventTriggerName) {
@@ -983,8 +1069,24 @@
                 disputeDescMain.innerText = "Intercepts the pending cooling hold to freeze funds.";
             }
 
+            // Adjust withdrawal button eligibility
+            if (lienStatus === 'RELEASED_TO_WALLET' && sellerWalletBalance > 0) {
+                buttons.withdraw.disabled = false;
+                buttons.withdraw.classList.remove('opacity-50', 'cursor-not-allowed');
+                buttons.withdraw.innerText = "🔓 Execute AML-Verified Withdrawal";
+            } else {
+                buttons.withdraw.disabled = true;
+                buttons.withdraw.classList.add('opacity-50', 'cursor-not-allowed');
+                if (lienStatus === 'WITHDRAWN_TO_BANK') {
+                    buttons.withdraw.innerText = "✅ Bank Outflow Complete";
+                } else {
+                    buttons.withdraw.innerText = "🔒 Withdraw to External Bank";
+                }
+            }
+
             // Update logger & visual formats
             addLog(`State updated to: [${currentState}] (Trigger: ${eventTriggerName})`, 'success');
+            updateWalletUI();
             updatePayloadPreview();
         }
 
@@ -993,6 +1095,7 @@
         // 1. Buyer Paid
         buttons.pays.addEventListener('click', function() {
             contractAmount = 1500.00;
+            lienStatus = 'ESCROW_LIEN_LOCKED';
             document.getElementById('state-val-01').innerText = "$1,500.00";
             addLog("Webhook: open_banking_auth_cleared received.", 'webhook');
             addLog("Ledger command: lock_funds_node ($1,500.00) completed.", 'system');
@@ -1062,6 +1165,7 @@
                 // Intercepting active cooling period triggers an immediate manual dispute triage
                 addLog("Action: Buyer intercepted cooling hold to log a late-stage dispute!", 'error');
                 clearActiveTimers();
+                lienStatus = 'ESCROW_LIEN_LOCKED';
                 setEngineState(STATES.DISPUTE_TRIAGE, 'DISPUTE_LATE_INTERCEPT');
                 addLog("Ledger command: freeze_ledger_slice activated.", 'system');
             } else {
@@ -1082,6 +1186,7 @@
                         clearActiveTimers();
                         addLog("Clock trigger: TR_REJECTION expired. Resolution failed or ignored.", 'timer');
                         addLog("Failsafe: Defaulting to Dispute Triage track.", 'error');
+                        lienStatus = 'ESCROW_LIEN_LOCKED';
                         setEngineState(STATES.DISPUTE_TRIAGE, 'REJECTION_TIMER_EXPIRED');
                     }
                 }, 1000);
@@ -1118,6 +1223,7 @@
         buttons.reconcileEscalate.addEventListener('click', function() {
             addLog("Action: Buyer declared resolution unsatisfactory. Escalling to dispute triage.", 'error');
             clearActiveTimers();
+            lienStatus = 'ESCROW_LIEN_LOCKED';
             setEngineState(STATES.DISPUTE_TRIAGE, 'BUYER_ESCALATED_RECONCILIATION');
         });
 
@@ -1134,10 +1240,32 @@
             executeSettlement();
         });
 
+        // 7. Manual AML Bank Withdrawal Outflow
+        buttons.withdraw.addEventListener('click', function() {
+            buttons.withdraw.disabled = true;
+            buttons.withdraw.classList.add('opacity-50', 'cursor-not-allowed');
+            buttons.withdraw.innerText = "⚡ Verifying KYC Identities...";
+            
+            addLog("Outflow Action: Outbound withdrawal trigger initialized by user.", 'system');
+            addLog("Compliance Check: Cross-referencing external bank account with ledger KYC file...", 'system');
+            
+            setTimeout(() => {
+                addLog("Compliance Check: Match confirmed. External wire recipient 'Merchant Account B' matches Wallet ID.", 'success');
+                addLog("Compliance Check: Automated AML checks passed.", 'success');
+                addLog("API Action: Outbound wire request cleared to Zenith Bank rails.", 'success');
+                addLog("Proprietary wallet balance debited. Outflow complete.", 'system');
+                
+                sellerWalletBalance = 0.00;
+                lienStatus = 'WITHDRAWN_TO_BANK';
+                setEngineState(STATES.SETTLED, 'FUNDS_WITHDRAWN_TO_BANK');
+            }, 1800);
+        });
+
         // Auto Cancel Execution
         function executeAutoCancel() {
             addLog("Ledger command: reverse_buyer_deposits initiated.", 'system');
             addLog("Settlement payload executed to Open Banking rails. Returning $1,500.00.", 'success');
+            lienStatus = 'NO_LIEN_ACTIVE';
             setEngineState(STATES.AUTO_CANCELLED, 'TR_REVERTED_100_PERCENT');
         }
 
@@ -1155,7 +1283,7 @@
                 document.getElementById('settled-badge').className = "text-[10px] bg-brandOrange/20 text-brandOrange border border-brandOrange/30 px-1.5 py-0.5 rounded font-mono font-semibold";
                 document.getElementById('settled-title').innerText = "RELEASE PENDING";
                 document.getElementById('settled-desc').innerText = "Funds in cooling-off hold. Dispute can be logged by the buyer.";
-                document.getElementById('settled-status').innerText = "RELEASING FUNDS...";
+                document.getElementById('settled-status').innerText = "RELEASING TO WALLET...";
                 document.getElementById('settled-status').className = "text-brandOrange font-semibold animate-pulse";
                 
                 countdownPayment.classList.remove('hidden');
@@ -1182,16 +1310,20 @@
             clearActiveTimers();
             addLog("Ledger command: compile_settlement_payload.", 'system');
             addLog("Settlement payload successfully pushed to Zenith Bank API.", 'success');
+            addLog("Lien released: $1,500.00 settled into Seller's co-branded escrow wallet.", 'success');
             
             // Restore card to original fully settled parameters
-            document.getElementById('settled-badge').innerText = "SETTLED";
+            document.getElementById('settled-badge').innerText = "SETTLED IN WALLET";
             document.getElementById('settled-badge').className = "text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold";
-            document.getElementById('settled-title').innerText = "SETTLED";
-            document.getElementById('settled-desc').innerText = "API payload clears transaction to verified partner bank rails.";
-            document.getElementById('settled-status').innerText = "TRANSACTION COMPLETE";
+            document.getElementById('settled-title').innerText = "SETTLED IN WALLET";
+            document.getElementById('settled-desc').innerText = "Funds successfully placed inside seller's partner trust wallet. Ready for manual withdrawal.";
+            document.getElementById('settled-status').innerText = "LEDGER UNLOCKED";
             document.getElementById('settled-status').className = "text-brandEmerald font-bold tracking-wider";
             
-            setEngineState(STATES.SETTLED, 'FUNDS_SETTLED_TO_SELLER');
+            sellerWalletBalance = 1500.00;
+            lienStatus = 'RELEASED_TO_WALLET';
+            
+            setEngineState(STATES.SETTLED, 'FUNDS_SETTLED_TO_SELLER_WALLET');
         }
 
         // Restart State Machine
@@ -1199,15 +1331,18 @@
             clearActiveTimers();
             contractAmount = 0.00;
             rejectionExtensionCount = 0;
+            sellerWalletBalance = 0.00;
+            lienStatus = 'NO_LIEN_ACTIVE';
+            
             document.getElementById('state-val-01').innerText = "$0.00";
             logConsole.innerHTML = "";
             
             // Reset Settled card visual defaults
-            document.getElementById('settled-badge').innerText = "SETTLED";
+            document.getElementById('settled-badge').innerText = "SETTLED IN WALLET";
             document.getElementById('settled-badge').className = "text-[10px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold";
-            document.getElementById('settled-title').innerText = "SETTLED";
-            document.getElementById('settled-desc').innerText = "API payload clears transaction to verified partner bank rails.";
-            document.getElementById('settled-status').innerText = "TRANSACTION COMPLETE";
+            document.getElementById('settled-title').innerText = "SETTLED IN WALLET";
+            document.getElementById('settled-desc').innerText = "Funds successfully placed inside seller's partner trust wallet. Ready for manual withdrawal.";
+            document.getElementById('settled-status').innerText = "LEDGER UNLOCKED";
             document.getElementById('settled-status').className = "text-brandEmerald font-bold tracking-wider";
             countdownPayment.classList.add('hidden');
 
