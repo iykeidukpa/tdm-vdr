@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustedPayer V3 - Developer Integration Sandbox</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font and Fira Code for code styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        devDarkBg: '#090D16',
+                        devCardBg: '#111827',
+                        devCodeBg: '#1F2937',
+                        devBorder: '#374151',
+                        brandBlue: '#3B82F6',
+                        brandEmerald: '#10B981',
+                        brandAmber: '#F59E0B',
+                        brandRose: '#F43F5E',
+                        brandViolet: '#8B5CF6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090D16;
+            color: #F3F4F6;
+        }
+        /* Scrollbars for Console and Code blocks */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #090D16;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+    </style>
+</head>
+<body class="selection:bg-brandBlue selection:text-white antialiased">
+
+    <!-- DEVELOPER PORTAL NAVBAR -->
+    <header class="border-b border-devBorder bg-devDarkBg/90 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-gradient-to-tr from-brandBlue to-brandViolet rounded-lg flex items-center justify-center text-white font-extrabold text-base shadow-lg shadow-brandViolet/20">
+                    TP
+                </div>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-white uppercase flex items-center gap-2">
+                        TrustedPayer <span class="text-xs bg-slate-800 text-brandBlue border border-devBorder px-2 py-0.5 rounded font-mono normal-case">V3 DevHub</span>
+                    </h1>
+                    <p class="text-[11px] text-gray-400">Merchant API & Transaction Sandbox</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/20">
+                    <span class="w-1.5 h-1.5 bg-brandEmerald rounded-full mr-1.5 animate-pulse"></span> Sandbox API Active
+                </span>
+                <span class="text-[11px] text-gray-500 font-mono hidden md:inline">SDK_REF_v3.2.1</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        
+        <!-- INTRO HERO BLOCK -->
+        <div class="bg-gradient-to-r from-devCardBg to-[#111C35] border border-devBorder rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+            <div class="absolute -right-8 -top-8 text-8xl text-devBorder/20 font-mono font-bold select-none pointer-events-none">SDK</div>
+            <div class="relative z-10 max-w-4xl space-y-3">
+                <div class="text-xs font-mono text-brandViolet uppercase tracking-wider font-bold">MERCHANT INTEGRATION FRAMEWORK</div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Dynamic Escrow Routing & Category Mapping Engine</h2>
+                <p class="text-gray-300 text-sm leading-relaxed">
+                    Welcome to the TrustedPayer Partner Sandbox. This environment lets you simulate how an integrating marketplace (e.g., your e-commerce platform or B2B directory) configures metadata, resolves category timer mismatches, and pushes live, event-driven state transitions to our ledger system. Use the tabs below to configure mappings, initiate dynamic checkout flows, and test all automated timing boundaries.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB CONTAINER -->
+        <div class="border-b border-devBorder flex flex-wrap gap-2 text-sm">
+            <button id="tab-btn-map" class="px-4 py-2 border-b-2 border-brandBlue text-white font-medium focus:outline-none transition-all duration-150">
+                1. Category Mapping Engine
+            </button>
+            <button id="tab-btn-checkout" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white font-medium focus:outline-none transition-all duration-150">
+                2. Marketplace Checkout API
+            </button>
+            <button id="tab-btn-sandbox" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white font-medium focus:outline-none transition-all duration-150">
+                3. Lifecycle Sandbox Simulation
+            </button>
+            <button id="tab-btn-docs" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-white font-medium focus:outline-none transition-all duration-150">
+                4. API Documentation
+            </button>
+        </div>
+
+        <!-- CUSTOM NOTIFICATION TOAST -->
+        <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-brandBlue p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm pointer-events-none">
+            <span class="text-xl shrink-0" id="toast-icon">⚡</span>
+            <div>
+                <p class="text-xs font-bold text-white uppercase tracking-wider" id="toast-title">API NOTIFICATION</p>
+                <p class="text-xs text-gray-300 mt-1" id="toast-message">Action executed successfully.</p>
+            </div>
+        </div>
+
+        <!-- TAB SECTION 1: CATEGORY MAPPING ENGINE -->
+        <section id="tab-section-map" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Details: Explanation of choice -->
+                <div class="lg:col-span-1 space-y-4">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <span>🏷️</span> Dynamic Semantic Category Mapping
+                    </h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        To enforce strict risk limits, the TrustedPayer core engine operates on four global parent categories with hardcoded timer configurations. When you integrate a third-party marketplace, their local categories will frequently fail to match our database.
+                    </p>
+                    
+                    <div class="bg-devCardBg border border-devBorder p-4 rounded-xl space-y-3">
+                        <h4 class="text-xs font-bold text-brandViolet uppercase tracking-wider">Our Architectural Solution</h4>
+                        <p class="text-[11px] text-gray-300 leading-relaxed">
+                            Rather than dumping unmatched categories into a default "General" category (which distorts risk tracking and violates our AML profile guarantees), TrustedPayer employs a <strong>Hybrid Semantic String Distance Mapping</strong> model. 
+                        </p>
+                        <p class="text-[11px] text-gray-300 leading-relaxed">
+                            Upon receiving a contract initialization request, our API pipeline checks if the category exists. If unmatched, it runs a semantic string heuristic lookup against global parents. If the confidence matches above 70%, it automatically instantiates a new virtual mapped category label inheriting the correct parental properties. If it fails the threshold, it falls back to a standardized high-level ancestor framework.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-950 p-3.5 rounded-lg border border-devBorder/60 space-y-2">
+                        <span class="text-[10px] text-gray-400 block uppercase font-bold">Inherited Global Timers</span>
+                        <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                            <div class="bg-devDarkBg p-2 rounded border border-devBorder/40">
+                                <span class="text-brandBlue block">TR_DELIVERY</span>
+                                <span class="font-bold text-white">Physical: 15s</span>
+                            </div>
+                            <div class="bg-devDarkBg p-2 rounded border border-devBorder/40">
+                                <span class="text-brandViolet block">TR_INSPECTION</span>
+                                <span class="font-bold text-white">Service: 20s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Interactive Mapping Panel -->
+                <div class="lg:col-span-2 bg-devCardBg border border-devBorder rounded-2xl p-6 space-y-6">
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Interactive Mapping Console</h4>
+                        <p class="text-xs text-gray-400 mt-1">Simulate sending standard and non-standard custom category strings. Observe how the endpoint routes them to appropriate timer bounds.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Select or Enter Category String to Resolve</label>
+                            <div class="flex gap-2">
+                                <select id="category-selector-api" class="flex-grow bg-devDarkBg border border-devBorder rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brandBlue">
+                                    <option value="Physical Retail Goods">Physical Retail Goods (Standard Parent)</option>
+                                    <option value="Professional Digital Services">Professional Digital Services (Standard Parent)</option>
+                                    <option value="High-Value Exotic Antiques">High-Value Exotic Antiques (Custom Unmatched - Expect string distance mapping)</option>
+                                    <option value="Freelance Python Programming">Freelance Python Programming (Custom Unmatched - Expect digital parent mapping)</option>
+                                    <option value="Unregistered Unknown Token">Unregistered Unknown Token (Custom Unmatched - Fallback routine triggered)</option>
+                                </select>
+                                <button id="btn-resolve-mapping" class="bg-brandBlue hover:bg-brandBlue/90 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+                                    Resolve Mapping
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mapping Result Output View -->
+                        <div class="bg-devDarkBg border border-devBorder rounded-xl p-4 space-y-3 relative">
+                            <div class="flex justify-between items-center border-b border-devBorder pb-2">
+                                <span class="text-[10px] font-mono text-gray-400">RESOLVED SCHEMATIC OUTCOME</span>
+                                <span id="mapping-badge-status" class="px-2 py-0.5 rounded text-[9px] font-mono bg-brandBlue/20 text-brandBlue border border-brandBlue/30">PENDING_EVAL</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs py-1">
+                                <div>
+                                    <span class="text-[9px] uppercase text-gray-500 block">Assigned Parent Category</span>
+                                    <span id="map-out-parent" class="font-bold text-white">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] uppercase text-gray-500 block">Mapping Strategy Employed</span>
+                                    <span id="map-out-strategy" class="font-mono text-brandViolet font-semibold">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] uppercase text-gray-500 block">Target Timer Rules</span>
+                                    <span id="map-out-timers" class="font-mono text-brandEmerald font-semibold">-</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#1e293b]/30 p-3 rounded-lg border border-devBorder/30 space-y-2">
+                                <p class="text-[10px] text-gray-300 italic" id="map-out-text">Select a category and trigger Resolve Mapping to view automated routing behavior.</p>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <button id="btn-proceed-to-checkout" class="bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-90 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-brandBlue/10">
+                                Apply Mapping & Proceed to Checkout ➔
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB SECTION 2: MARKETPLACE CHECKOUT -->
+        <section id="tab-section-checkout" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left: Simulated NexaMarket Storefront Checkout Panel -->
+                <div class="lg:col-span-2 bg-devCardBg border border-devBorder rounded-2xl p-6 space-y-6">
+                    <div class="border-b border-devBorder pb-4 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] font-bold text-brandViolet uppercase tracking-wider">SIMULATED STOREFRONT</span>
+                            <h3 class="text-lg font-bold text-white">NexaMarket Checkout Gateway</h3>
+                        </div>
+                        <span class="text-xs bg-brandViolet/10 text-brandViolet border border-brandViolet/20 px-2.5 py-1 rounded font-mono font-semibold">Integrator Sandbox</span>
+                    </div>
+
+                    <!-- Checkout Form -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <label class="block text-gray-400 font-bold mb-1">Contract / Deal Item Name</label>
+                            <input id="checkout-deal-name" type="text" value="Enterprise Database Server Node V10" class="w-full bg-devDarkBg border border-devBorder rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 font-bold mb-1">Payment Amount (USD)</label>
+                            <input id="checkout-amount" type="number" value="2500" class="w-full bg-devDarkBg border border-devBorder rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brandBlue">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 font-bold mb-1">Local Marketplace Category</label>
+                            <input id="checkout-category-input" type="text" value="Physical Retail Goods" class="w-full bg-devDarkBg border border-devBorder rounded-lg px-3 py-2 text-white bg-opacity-50 cursor-not-allowed" readonly>
+                            <p class="text-[9px] text-slate-500 mt-1 italic">Inherited from the mapping parameters set in Step 1.</p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 font-bold mb-1">Seller Custom Payout Delay (TR_PAYMENT)</label>
+                            <select id="checkout-payment-delay" class="w-full bg-devDarkBg border border-devBorder rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brandBlue">
+                                <option value="5">5 Seconds (Short Cooling Period)</option>
+                                <option value="12">12 Seconds (Moderate Cooling Period)</option>
+                                <option value="0">0 Seconds (Instant Settle on Approval)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-devDarkBg border border-devBorder rounded-xl p-4 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-brandBlue text-sm">🔒</span>
+                            <span class="text-xs font-bold text-gray-300">TrustedPayer Automated Routing Compliance</span>
+                        </div>
+                        <p class="text-[10.5px] text-gray-400 leading-relaxed">
+                            Upon checkout completion, NexaMarket will query our core API, dispatching this transaction profile. The funds are held in secure nodal accounts with a temporary lien assigned, preventing intermediate leakage.
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <button id="btn-back-to-mapping" class="text-xs text-gray-400 hover:text-white transition">➔ Reconfigure Category Mapping</button>
+                        <button id="btn-initialize-escrow" class="bg-brandBlue hover:bg-brandBlue/90 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-lg shadow-brandBlue/20 flex items-center gap-2">
+                            <span>🔌</span> Initialize Escrow Transaction
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Auto-compiled Request payload JSON payload -->
+                <div class="lg:col-span-1 flex flex-col justify-between bg-devCardBg border border-devBorder rounded-2xl p-6 min-h-[400px]">
+                    <div class="border-b border-devBorder pb-3 flex justify-between items-center">
+                        <span class="text-xs font-mono font-bold text-gray-300">COMPILING INITIALIZE API REQUEST</span>
+                        <span class="w-2 h-2 rounded-full bg-brandBlue animate-pulse"></span>
+                    </div>
+
+                    <div class="flex-grow bg-devDarkBg/80 rounded-xl p-3 my-4 border border-devBorder/80 font-mono text-[10px] text-gray-300 overflow-x-auto select-all custom-scrollbar max-h-[320px]">
+                        <pre id="api-request-json">
+{
+  "contract_name": "Enterprise Database Server Node V10",
+  "category": "Physical Retail Goods",
+  "fiat_amount": 2500,
+  "client_id": "cli_nexa_market_prod_2026",
+  "seller_configs": {
+    "tr_payment_hold_seconds": 5
+  }
+}
+                        </pre>
+                    </div>
+                    
+                    <div class="text-[9.5px] text-gray-400 italic text-right">
+                        *Generated based on input storefront variables.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB SECTION 3: LIFECYCLE SANDBOX SIMULATION -->
+        <section id="tab-section-sandbox" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <!-- Main Lifecycle Status, State Graph Interface -->
+                <div class="xl:col-span-2 space-y-6">
+                    
+                    <!-- DYNAMIC SCENARIO CONTROL CARD -->
+                    <div class="bg-devCardBg border border-devBorder rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between border-b border-devBorder pb-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">SIMULATOR STATE CONTROLS</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 font-mono">Current State:</span>
+                                <span id="simulation-state-tag" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-gray-400 border border-devBorder">UNINITIALIZED</span>
+                            </div>
+                        </div>
+
+                        <!-- Scenarios Quick Injectors buttons -->
+                        <div>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase mb-2">Inject Scenario Quick-Paths</p>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <button id="scen-btn-happy" class="px-3 py-1.5 rounded-lg bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/20 hover:bg-brandEmerald/20 transition">Scenario A: Happy Path</button>
+                                <button id="scen-btn-del-timeout" class="px-3 py-1.5 rounded-lg bg-brandRose/10 text-brandRose border border-brandRose/20 hover:bg-brandRose/20 transition">Scenario B: Delivery Failure</button>
+                                <button id="scen-btn-reconcile" class="px-3 py-1.5 rounded-lg bg-brandViolet/10 text-brandViolet border border-brandViolet/20 hover:bg-brandViolet/20 transition">Scenario C: Rejection Resolve</button>
+                                <button id="scen-btn-cooling-dispute" class="px-3 py-1.5 rounded-lg bg-brandAmber/10 text-brandAmber border border-brandAmber/20 hover:bg-brandAmber/20 transition">Scenario D: Cooling Period Intercept</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flowchart Grid (Dynamic Canvas representing Sandbox) -->
+                    <div class="bg-devCardBg border border-devBorder rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[420px]">
+                        
+                        <div class="flex items-center justify-between mb-4 border-b border-devBorder pb-3">
+                            <span class="text-xs font-mono text-gray-400">STATE TRANSITION CANVAS</span>
+                            <div class="flex flex-wrap items-center gap-3 text-[10px]">
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-brandBlue inline-block"></span> Active</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-brandViolet inline-block"></span> Reconciling</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-brandAmber inline-block"></span> Cooling Delay</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-brandEmerald inline-block"></span> Settled Node</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Diagram Container -->
+                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center justify-center py-4 relative">
+                            
+                            <!-- State 1: Initialization -->
+                            <div id="scen-state-01" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">STATE 01</span>
+                                    <span class="text-[9px] bg-slate-800 text-gray-400 px-1.5 py-0.5 rounded font-mono">INITIAL</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">INITIALIZATION</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Contracts initiated & mapped. Escrow clearing.</p>
+                                <div class="mt-2 text-[10px] font-semibold text-brandBlue flex justify-between items-center">
+                                    <span>Escrow Funds</span>
+                                    <span id="scen-disp-amount">$0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- State 2: Pre-Fulfillment -->
+                            <div id="scen-state-02" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">STATE 02</span>
+                                    <span id="badge-scen-delivery" class="text-[9px] bg-brandAmber/20 text-brandAmber border border-brandAmber/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_DELIVERY</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">PRE-FULFILLMENT</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Escrow funded. Awaiting shipping logistics logs.</p>
+                                <div class="mt-2 text-[10px] flex justify-between items-center">
+                                    <span class="text-[9px] text-gray-500">Delivery Clock</span>
+                                    <span id="timer-scen-delivery" class="font-mono text-brandAmber font-bold">-</span>
+                                </div>
+                            </div>
+
+                            <!-- State 3: Post-Fulfillment -->
+                            <div id="scen-state-03" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">STATE 03</span>
+                                    <span id="badge-scen-inspection" class="text-[9px] bg-brandBlue/20 text-brandBlue border border-brandBlue/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_INSPECTION</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">POST-FULFILLMENT</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Delivery cleared. Active inspection constraints.</p>
+                                <div class="mt-2 text-[10px] flex justify-between items-center">
+                                    <span class="text-[9px] text-gray-500">Inspect Clock</span>
+                                    <span id="timer-scen-inspection" class="font-mono text-brandBlue font-bold">-</span>
+                                </div>
+                            </div>
+
+                            <!-- State 4: Rejection Reconciliation -->
+                            <div id="scen-state-04" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">STATE 04</span>
+                                    <span id="badge-scen-rejection" class="text-[9px] bg-brandViolet/20 text-brandViolet border border-brandViolet/30 px-1.5 py-0.5 rounded font-mono hidden font-semibold">TR_REJECTION</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">RECONCILIATION</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Cargo rejected. Resolving via sandbox buffer.</p>
+                                <div class="mt-2 text-[10px] flex justify-between items-center">
+                                    <span class="text-[9px] text-gray-500">Reconcile Clock</span>
+                                    <span id="timer-scen-rejection" class="font-mono text-brandViolet font-bold">-</span>
+                                </div>
+                            </div>
+
+                            <!-- State 5: Dispute Triage -->
+                            <div id="scen-state-05" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">STATE 05</span>
+                                    <span class="text-[9px] bg-brandRose/20 text-brandRose border border-brandRose/30 px-1.5 py-0.5 rounded font-mono font-semibold">TRIAGE</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">DISPUTE TRIAGE</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Unresolved conflict. Directing to arbitration.</p>
+                                <div class="mt-2 text-[10px]">
+                                    <span class="text-[9px] text-brandRose font-bold uppercase">LEDGER_FROZEN</span>
+                                </div>
+                            </div>
+
+                            <!-- State 6: Auto-Cancelled (Terminal) -->
+                            <div id="scen-state-06" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">TERMINAL</span>
+                                    <span class="text-[9px] bg-brandRose/20 text-brandRose border border-brandRose/30 px-1.5 py-0.5 rounded font-mono font-semibold">REVERTED</span>
+                                </div>
+                                <h4 class="font-bold text-[11px] text-white mt-2">AUTO-CANCELLED</h4>
+                                <p class="text-[9.5px] text-gray-400 leading-snug">Contract invalidated. 100% buyer payout executed.</p>
+                                <div class="mt-2 text-[9px] text-gray-500 font-mono">CODE: TX_REVERT</div>
+                            </div>
+
+                            <!-- State 7: Settled (Terminal / Cooling Buffer) -->
+                            <div id="scen-state-07" class="border border-devBorder bg-devDarkBg/50 p-3.5 rounded-xl flex flex-col justify-between h-34 transition-all duration-300 col-span-1 md:col-span-2">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono text-gray-500">SETTLEMENT</span>
+                                    <span id="settled-scen-badge" class="text-[9px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold">SETTLED</span>
+                                </div>
+                                <h4 id="settled-scen-title" class="font-bold text-[11px] text-white mt-2">PROPRIETARY PARTNER WALLET</h4>
+                                <p id="settled-scen-desc" class="text-[9.5px] text-gray-400 leading-snug">Funds successfully cleared to verified merchant node.</p>
+                                <div class="mt-2 text-[10px] flex justify-between items-center gap-2">
+                                    <span id="settled-scen-status" class="text-[9px] text-brandEmerald font-bold tracking-wider uppercase">LEDGER UNLOCKED</span>
+                                    <span id="timer-scen-payment" class="font-mono text-brandAmber font-bold hidden">-</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Technical Footnote -->
+                        <div class="border-t border-devBorder pt-3 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-2">
+                            <div>Simulator Target: <span id="current-sandbox-target" class="font-mono text-brandBlue">Enterprise Database Server Node V10</span></div>
+                            <div>Last Webhook: <span id="last-sandbox-webhook" class="font-mono text-gray-400">NONE</span></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Sandbox Event Interactive dispatchers -->
+                    <div class="bg-devDarkBg border border-devBorder rounded-2xl p-6 space-y-4">
+                        <div>
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Trigger Sandbox Event Webhooks</h4>
+                            <p class="text-xs text-gray-400 mt-1">Simulate inbound calls from the buyer frontend, logistics systems, or manual overrides.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            <!-- Authorization / Payment -->
+                            <button id="scen-api-deposit" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandBlue/50 text-left transition duration-200 group">
+                                <span class="text-[9px] text-brandBlue font-mono uppercase mb-1">API Endpoint Context</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandBlue transition">Buyer Deposit Cleared</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Simulates transaction funding confirmation.</span>
+                            </button>
+
+                            <!-- Logistics Delivery -->
+                            <button id="scen-api-courier" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandViolet/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandViolet font-mono uppercase mb-1">Logistics webhook</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandViolet transition">Courier Submits OTP</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Simulates delivery location verification.</span>
+                            </button>
+
+                            <!-- Forced Timeout -->
+                            <button id="scen-api-timeout" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandRose/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandRose font-mono uppercase mb-1">Chronological Gate</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandRose transition">Trigger Timeout (Revert)</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Forces TR_DELIVERY expiration.</span>
+                            </button>
+
+                            <!-- Buyer Approval -->
+                            <button id="scen-api-approve" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandEmerald/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandEmerald font-mono uppercase mb-1">User FrontEnd Action</span>
+                                <span id="lbl-scen-approve" class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Buyer Approves Release</span>
+                                <span id="desc-scen-approve" class="text-[9.5px] text-gray-400 mt-1">Bypasses inspection constraints.</span>
+                            </button>
+
+                            <!-- Buyer Rejection -->
+                            <button id="scen-api-reject" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandRose/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandRose font-mono uppercase mb-1">User FrontEnd Action</span>
+                                <span id="lbl-scen-reject" class="font-semibold text-xs text-white group-hover:text-brandRose transition">Buyer Rejects Delivery</span>
+                                <span id="desc-scen-reject" class="text-[9.5px] text-gray-400 mt-1">Triggers TR_REJECTION window.</span>
+                            </button>
+
+                            <!-- Reconcile Option: Accept Proposal -->
+                            <button id="scen-api-rec-accept" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandEmerald/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandEmerald font-mono uppercase mb-1">Reconciliation API</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandEmerald transition">Accept Resolution Offer</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Resolves state 04 into payment routing.</span>
+                            </button>
+
+                            <!-- Reconcile Option: Extend Timer -->
+                            <button id="scen-api-rec-extend" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandViolet/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandViolet font-mono uppercase mb-1">Policy extension</span>
+                                <span id="lbl-scen-extend" class="font-semibold text-xs text-white group-hover:text-brandViolet transition">Extend Reconcile Limit</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Adds +5s (Max 2 extensions).</span>
+                            </button>
+
+                            <!-- Reconcile Option: Escalate -->
+                            <button id="scen-api-rec-escalate" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandRose/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandRose font-mono uppercase mb-1">Escalation API</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandRose transition">Escalate to Arbitrator</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Bypasses reconciliation to dispute triage.</span>
+                            </button>
+
+                            <!-- Resolve Dispute manually -->
+                            <button id="scen-api-dispute-resolve" class="flex flex-col items-start p-3 bg-slate-900 border border-devBorder rounded-xl hover:border-brandBlue/50 text-left transition duration-200 group opacity-50 cursor-not-allowed" disabled>
+                                <span class="text-[9px] text-brandBlue font-mono uppercase mb-1">Compliance Module</span>
+                                <span class="font-semibold text-xs text-white group-hover:text-brandBlue transition">Force Arbitrated Resolution</span>
+                                <span class="text-[9.5px] text-gray-400 mt-1">Resolves manual case review.</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Stream Console Log & Compiled Output Payload -->
+                <div class="space-y-6">
+                    
+                    <!-- DYNAMIC STREAMING LOGS -->
+                    <div class="bg-devDarkBg border border-devBorder rounded-2xl p-5 flex flex-col justify-between h-[340px]">
+                        <div class="flex items-center justify-between border-b border-devBorder pb-2 mb-3">
+                            <span class="text-xs font-mono font-bold text-gray-400">LIVE SANDBOX EVENT STREAMS</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-brandBlue animate-pulse"></span>
+                        </div>
+                        
+                        <div id="sandbox-log-console" class="flex-grow font-mono text-[11px] text-brandBlue overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                            <!-- Dynamic simulation logs print here -->
+                        </div>
+                    </div>
+
+                    <!-- OPEN BANKING RESPONSE CODE PAYLOAD -->
+                    <div class="bg-devDarkBg border border-devBorder rounded-2xl p-5 flex flex-col justify-between min-h-[340px]">
+                        <div class="flex items-center justify-between border-b border-devBorder pb-2 mb-3">
+                            <span class="text-xs font-mono font-bold text-gray-400">OUTGOING HOOK PAYLOAD (JSON)</span>
+                            <button id="btn-copy-sandbox-payload" class="text-xs text-slate-500 hover:text-white transition">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="flex-grow bg-devDarkBg/80 rounded-xl p-3 border border-devBorder/80 font-mono text-[10px] text-gray-300 overflow-x-auto select-all custom-scrollbar max-h-[250px]">
+                            <pre id="sandbox-payload-content">
+{
+  "event": "STATE_READY",
+  "contract_id": "tx_nexa_78a1",
+  "status": "UNINITIALIZED"
+}
+                            </pre>
+                        </div>
+                        <div class="text-[9.5px] text-gray-500 mt-2 italic text-right">
+                            *Dynamic based on lifecycle transitions.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB SECTION 4: API DOCUMENTATION -->
+        <section id="tab-section-docs" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Docs Menu -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-devCardBg border border-devBorder rounded-xl p-4 space-y-2">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Integration Index</h4>
+                        <a href="#doc-init" class="block text-xs text-brandBlue hover:underline py-1">➔ POST /v3/escrow/initialize</a>
+                        <a href="#doc-webhook" class="block text-xs text-gray-400 hover:text-white py-1">➔ Webhook Outflows (TR_EVENTS)</a>
+                        <a href="#doc-errors" class="block text-xs text-gray-400 hover:text-white py-1">➔ Standard API Error Vectors</a>
+                    </div>
+
+                    <div class="bg-[#1e293b]/20 border border-devBorder p-4 rounded-xl space-y-3">
+                        <h5 class="text-xs font-bold text-white uppercase">Client Authentication</h5>
+                        <p class="text-[11px] text-gray-400 leading-relaxed">
+                            All requests must specify your co-branded Client ID in the header context. Authenticate using Bearer tokens provisioned in your Developer Hub dashboard.
+                        </p>
+                        <div class="bg-devDarkBg p-2.5 rounded border border-devBorder text-[9.5px] font-mono text-gray-300">
+                            Authorization: Bearer tp_sec_live_...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Detailed Documentation content -->
+                <div class="lg:col-span-2 bg-devCardBg border border-devBorder rounded-2xl p-6 space-y-8">
+                    
+                    <!-- Segment 1: Initialization -->
+                    <div id="doc-init" class="space-y-4">
+                        <div class="border-b border-devBorder pb-2">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-brandBlue/20 text-brandBlue border border-brandBlue/30 mr-2">POST</span>
+                            <span class="font-mono text-xs font-bold text-white">/v3/escrow/initialize</span>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">
+                            Executes a secure transaction mapping. This registers a new contract with our state machine ledger, triggers semantic evaluation, assigns categorical timers, and prepares ring-fenced bank nodal coordinates.
+                        </p>
+
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Request Payload Structure (application/json)</span>
+                            <div class="bg-devDarkBg border border-devBorder rounded-lg p-3.5 font-mono text-[10px] text-gray-300 overflow-x-auto">
+<pre>
+{
+  "partner_id": "part_nexamarket_26",
+  "category_string": "Used Smart Devices",
+  "transaction_value": 2500.00,
+  "recipient_id": "merch_node_99a1",
+  "seller_configs": {
+    "tr_payment_hold_seconds": 15
+  }
+}
+</pre>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Success Response Outcome (201 Created)</span>
+                            <div class="bg-devDarkBg border border-devBorder rounded-lg p-3.5 font-mono text-[10px] text-gray-300 overflow-x-auto">
+<pre>
+{
+  "contract_hash": "0xFA991206BD",
+  "status": "INITIALIZED",
+  "resolved_category": "CUSTOM_MAPPED_PHYSICAL_GOODS",
+  "applied_timers": {
+    "tr_delivery_seconds": 15,
+    "tr_inspection_seconds": 20,
+    "tr_rejection_seconds": 12
+  },
+  "nodal_funding_account": "Zenith Bank PLC - Acc 1002991288"
+}
+</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segment 2: Webhook specifications -->
+                    <div id="doc-webhook" class="space-y-4 pt-4 border-t border-devBorder">
+                        <div class="pb-2">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-brandViolet/20 text-brandViolet border border-brandViolet/30 mr-2">WEBHOOK</span>
+                            <span class="font-mono text-xs font-bold text-white">Outbound Webhook Outflows</span>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed">
+                            Your marketplace backend must register endpoints capable of processing real-time callbacks dispatching state machine triggers. Webhooks execute whenever timers expire, buyers authorize early payouts, or disputes freeze operations.
+                        </p>
+
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Webhook Dispatch Schema (application/json)</span>
+                            <div class="bg-devDarkBg border border-devBorder rounded-lg p-3.5 font-mono text-[10px] text-gray-300 overflow-x-auto">
+<pre>
+{
+  "event_type": "contract.state_changed",
+  "contract_hash": "0xFA991206BD",
+  "previous_state": "PRE-FULFILLMENT",
+  "current_state": "POST-FULFILLMENT",
+  "trigger_event": "LOGISTICS_DELIVERY_CONFIRMED",
+  "timestamp": "2026-06-03T21:44:00Z"
+}
+</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segment 3: Error Handling -->
+                    <div id="doc-errors" class="space-y-4 pt-4 border-t border-devBorder">
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-white uppercase">Integration Error Vectors</h4>
+                            <p class="text-xs text-gray-400 mt-1">To ensure absolute API predictability, standard error structures return standard semantic responses.</p>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-lg border border-devBorder">
+                            <table class="w-full text-left border-collapse text-[11px] font-sans">
+                                <thead>
+                                    <tr class="bg-slate-900 border-b border-devBorder">
+                                        <th class="p-2 text-gray-300 font-bold uppercase">Code</th>
+                                        <th class="p-2 text-gray-300 font-bold uppercase">Trigger Scenario</th>
+                                        <th class="p-2 text-gray-300 font-bold uppercase">Resolution Method</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-devBorder">
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-2 font-mono text-brandRose">ERR_LIMIT_EXCEEDED</td>
+                                        <td class="p-2 text-gray-400">Seller delay sets hold beyond category constraints.</td>
+                                        <td class="p-2 text-gray-400">Pass dynamic values within configured global limits.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-2 font-mono text-brandRose">ERR_STATE_LOCKED</td>
+                                        <td class="p-2 text-gray-400">Post-Fulfillment actions fired on frozen dispute nodes.</td>
+                                        <td class="p-2 text-gray-400">Disputes require resolving via manual compliance rails before further API calls.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-900/40">
+                                        <td class="p-2 font-mono text-brandRose">ERR_MAP_THRESHOLD_FAIL</td>
+                                        <td class="p-2 text-gray-400">Heuristics mapping string yields under 20% semantic alignment score.</td>
+                                        <td class="p-2 text-gray-400">Fall back to standard ancestor definitions or update map registers.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER INFRASTRUCTURE -->
+    <footer class="border-t border-devBorder bg-devDarkBg/80 py-8 text-center text-[11px] text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-semibold text-gray-400 uppercase tracking-wider">TrustedPayer Intermediary Services Ltd.</p>
+            <p>Developer Integration Console Hub • Standard Release June 2026</p>
+            <p class="text-[10px] text-slate-600">Built for seamless B2B integration compliance and regulatory security audits.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC AND LIFE-CYCLE SIMULATION ENGINE -->
+    <script>
+        // Core Category Map Databases
+        const GLOBAL_PARENTS = {
+            PHYSICAL: {
+                name: "Physical Retail Goods",
+                tr_delivery: 15,
+                tr_inspection: 20,
+                tr_rejection: 12
+            },
+            DIGITAL: {
+                name: "Professional Digital Services",
+                tr_delivery: 30,
+                tr_inspection: 30,
+                tr_rejection: 20
+            }
+        };
+
+        // State Machine states enum
+        const LIFECYCLE_STATES = {
+            UNINITIALIZED: 'UNINITIALIZED',
+            INITIALIZATION: 'INITIALIZATION',
+            PRE_FULFILLMENT: 'PRE-FULFILLMENT',
+            POST_FULFILLMENT: 'POST-FULFILLMENT',
+            REJECTION_RECONCILIATION: 'REJECTION-RECONCILIATION',
+            DISPUTE_TRIAGE: 'DISPUTE-TRIAGE',
+            AUTO_CANCELLED: 'AUTO-CANCELLED',
+            SETTLED: 'SETTLED'
+        };
+
+        // UI Tabs Routing Controls
+        const tabs = {
+            map: { btn: document.getElementById('tab-btn-map'), sec: document.getElementById('tab-section-map') },
+            checkout: { btn: document.getElementById('tab-btn-checkout'), sec: document.getElementById('tab-section-checkout') },
+            sandbox: { btn: document.getElementById('tab-btn-sandbox'), sec: document.getElementById('tab-section-sandbox') },
+            docs: { btn: document.getElementById('tab-btn-docs'), sec: document.getElementById('tab-section-docs') }
+        };
+
+        function selectTab(targetTabKey) {
+            Object.keys(tabs).forEach(key => {
+                if (key === targetTabKey) {
+                    tabs[key].btn.classList.add('border-brandBlue', 'text-white');
+                    tabs[key].btn.classList.remove('border-transparent', 'text-gray-400');
+                    tabs[key].sec.classList.remove('hidden');
+                } else {
+                    tabs[key].btn.classList.remove('border-brandBlue', 'text-white');
+                    tabs[key].btn.classList.add('border-transparent', 'text-gray-400');
+                    tabs[key].sec.classList.add('hidden');
+                }
+            });
+        }
+
+        tabs.map.btn.addEventListener('click', () => selectTab('map'));
+        tabs.checkout.btn.addEventListener('click', () => selectTab('checkout'));
+        tabs.sandbox.btn.addEventListener('click', () => selectTab('sandbox'));
+        tabs.docs.btn.addEventListener('click', () => selectTab('docs'));
+
+        // Toast Helper
+        function triggerToast(title, message, icon = '⚡', borderClass = 'border-brandBlue') {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-message').innerText = message;
+            document.getElementById('toast-icon').innerText = icon;
+            toast.className = `fixed bottom-5 right-5 z-50 p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm pointer-events-auto bg-slate-900 border ${borderClass} transition-all duration-300 transform translate-y-0 opacity-100`;
+            
+            setTimeout(() => {
+                toast.className = `fixed bottom-5 right-5 z-50 p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm pointer-events-none bg-slate-900 border ${borderClass} transition-all duration-300 transform translate-y-20 opacity-0`;
+            }, 3000);
+        }
+
+        // CATEGORY RESOLVER LOGIC (Heuristic String Distance lookup)
+        let mappedConfigResult = { ...GLOBAL_PARENTS.PHYSICAL, resolvedLabel: "Physical Retail Goods", strategy: "STANDARDISED_MATCH" };
+
+        const categorySelector = document.getElementById('category-selector-api');
+        const resolveButton = document.getElementById('btn-resolve-mapping');
+
+        resolveButton.addEventListener('click', () => {
+            const rawValue = categorySelector.value;
+            
+            // Heuristic Distance Evaluator
+            if (rawValue.includes("Physical")) {
+                mappedConfigResult = {
+                    ...GLOBAL_PARENTS.PHYSICAL,
+                    resolvedLabel: "Physical Retail Goods",
+                    strategy: "DIRECT_REGISTRATION_MATCH"
+                };
+            } else if (rawValue.includes("Digital") || rawValue.includes("Python")) {
+                mappedConfigResult = {
+                    ...GLOBAL_PARENTS.DIGITAL,
+                    resolvedLabel: rawValue.includes("Python") ? "CUSTOM_MAPPED_DIGITAL_SERVICES" : "Professional Digital Services",
+                    strategy: rawValue.includes("Python") ? "HEURISTIC_CONFIDENCE_MATCH_88%" : "DIRECT_REGISTRATION_MATCH"
+                };
+            } else if (rawValue.includes("Antiques")) {
+                // High value item defaults to Physical parent but maps custom
+                mappedConfigResult = {
+                    ...GLOBAL_PARENTS.PHYSICAL,
+                    resolvedLabel: "CUSTOM_MAPPED_PHYSICAL_ANTIQUES",
+                    strategy: "HEURISTIC_CONFIDENCE_MATCH_74%"
+                };
+            } else {
+                // Fallback triggered
+                mappedConfigResult = {
+                    ...GLOBAL_PARENTS.PHYSICAL,
+                    resolvedLabel: "FALLBACK_CAT_PHYSICAL",
+                    strategy: "FALLBACK_ANCESTOR_RESOLVER"
+                };
+            }
+
+            // Update UI elements in resolution panel
+            document.getElementById('mapping-badge-status').innerText = "MAPPED_CONFIRMED";
+            document.getElementById('mapping-badge-status').className = "px-2 py-0.5 rounded text-[9px] font-mono bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30";
+            
+            document.getElementById('map-out-parent').innerText = mappedConfigResult.resolvedLabel;
+            document.getElementById('map-out-strategy').innerText = mappedConfigResult.strategy;
+            document.getElementById('map-out-timers').innerText = `DEL: ${mappedConfigResult.tr_delivery}s | INSP: ${mappedConfigResult.tr_inspection}s`;
+            
+            document.getElementById('map-out-text').innerHTML = `<strong>Success:</strong> API dynamically parsed string <code>"${rawValue}"</code> and assigned Parent bounds. Routing will execute correctly inside client sandbox checkout modules.`;
+
+            // Sync checkout category text input box
+            document.getElementById('checkout-category-input').value = mappedConfigResult.resolvedLabel;
+
+            triggerToast("Mapping Resolved", `Routed Category string to: ${mappedConfigResult.resolvedLabel}`, '🏷️', 'border-brandEmerald');
+        });
+
+        // Step transition helper
+        document.getElementById('btn-proceed-to-checkout').addEventListener('click', () => {
+            selectTab('checkout');
+            triggerToast("Step 2 Initiated", "Category configuration mapping imported into NexaMarket Checkout.", '🛒');
+        });
+
+        // API INITIALIZATION PAYLOAD GENERATOR
+        const dealNameInput = document.getElementById('checkout-deal-name');
+        const dealAmountInput = document.getElementById('checkout-amount');
+        const payoutDelaySelect = document.getElementById('checkout-payment-delay');
+        const requestJsonPre = document.getElementById('api-request-json');
+
+        function updateRequestPayloadJson() {
+            const apiPayload = {
+                partner_id: "part_nexamarket_26",
+                category_string: mappedConfigResult.resolvedLabel,
+                transaction_value: parseFloat(dealAmountInput.value) || 2500.00,
+                contract_name: dealNameInput.value,
+                recipient_id: "merch_node_99a1",
+                seller_configs: {
+                    tr_payment_hold_seconds: parseInt(payoutDelaySelect.value)
+                }
+            };
+            requestJsonPre.innerText = JSON.stringify(apiPayload, null, 2);
+        }
+
+        dealNameInput.addEventListener('input', updateRequestPayloadJson);
+        dealAmountInput.addEventListener('input', updateRequestPayloadJson);
+        payoutDelaySelect.addEventListener('change', updateRequestPayloadJson);
+        document.getElementById('btn-back-to-mapping').addEventListener('click', () => selectTab('map'));
+
+        // ESCROW ENGINE SIMULATION STATES ENGINE
+        const logConsole = document.getElementById('sandbox-log-console');
+        function addSandboxLog(message, type = 'system') {
+            const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+            let colorClass = 'text-brandBlue';
+            let icon = '⚙️';
+            
+            if (type === 'api') { colorClass = 'text-brandBlue'; icon = '🔌'; }
+            if (type === 'error') { colorClass = 'text-brandRose'; icon = '⚠️'; }
+            if (type === 'success') { colorClass = 'text-brandEmerald'; icon = '✅'; }
+            if (type === 'timer') { colorClass = 'text-brandAmber'; icon = '⏱️'; }
+            if (type === 'reconcile') { colorClass = 'text-brandViolet'; icon = '🔄'; }
+
+            const logItem = document.createElement('div');
+            logItem.className = `flex items-start gap-1.5 leading-relaxed py-0.5 ${colorClass}`;
+            logItem.innerHTML = `<span class="text-slate-600 shrink-0 font-semibold">[${timestamp}]</span> <span>${icon} ${message}</span>`;
+            
+            logConsole.appendChild(logItem);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        }
+
+        // State machine variables
+        let currentSandboxState = LIFECYCLE_STATES.UNINITIALIZED;
+        let activeSandboxTimer = null;
+        let sandboxTimeLeft = 0;
+        let categoryAssignedName = "Physical Retail Goods";
+        let sandboxTargetAmt = 2500;
+        let sandboxTargetName = "Enterprise Database Server Node V10";
+        let sandboxPaymentDelay = 5;
+        let extensionsLoggedCount = 0;
+
+        // Visual nodes mapping
+        const stateNodes = {
+            [LIFECYCLE_STATES.INITIALIZATION]: document.getElementById('scen-state-01'),
+            [LIFECYCLE_STATES.PRE_FULFILLMENT]: document.getElementById('scen-state-02'),
+            [LIFECYCLE_STATES.POST_FULFILLMENT]: document.getElementById('scen-state-03'),
+            [LIFECYCLE_STATES.REJECTION_RECONCILIATION]: document.getElementById('scen-state-04'),
+            [LIFECYCLE_STATES.DISPUTE_TRIAGE]: document.getElementById('scen-state-05'),
+            [LIFECYCLE_STATES.AUTO_CANCELLED]: document.getElementById('scen-state-06'),
+            [LIFECYCLE_STATES.SETTLED]: document.getElementById('scen-state-07')
+        };
+
+        const eventButtons = {
+            deposit: document.getElementById('scen-api-deposit'),
+            courier: document.getElementById('scen-api-courier'),
+            timeout: document.getElementById('scen-api-timeout'),
+            approve: document.getElementById('scen-api-approve'),
+            reject: document.getElementById('scen-api-reject'),
+            recAccept: document.getElementById('scen-api-rec-accept'),
+            recExtend: document.getElementById('scen-api-rec-extend'),
+            recEscalate: document.getElementById('scen-api-rec-escalate'),
+            disputeResolve: document.getElementById('scen-api-dispute-resolve')
+        };
+
+        const timerBadges = {
+            delivery: document.getElementById('badge-scen-delivery'),
+            inspection: document.getElementById('badge-scen-inspection'),
+            rejection: document.getElementById('badge-scen-rejection')
+        };
+
+        const countdowns = {
+            delivery: document.getElementById('timer-scen-delivery'),
+            inspection: document.getElementById('timer-scen-inspection'),
+            rejection: document.getElementById('timer-scen-rejection'),
+            payment: document.getElementById('timer-scen-payment')
+        };
+
+        // STATE RE-RENDER CONTROLLERS
+        function updateSandboxState(targetState, triggerActionName) {
+            currentSandboxState = targetState;
+
+            // Log details in outputs
+            document.getElementById('simulation-state-tag').innerText = currentSandboxState;
+            document.getElementById('current-sandbox-target').innerText = sandboxTargetName;
+            document.getElementById('last-sandbox-webhook').innerText = triggerActionName;
+
+            // Clear styling on all card nodes
+            Object.values(stateNodes).forEach(el => {
+                el.classList.remove('border-brandBlue', 'border-brandAmber', 'border-brandViolet', 'border-brandEmerald', 'border-brandRose', 'bg-slate-900/40');
+                el.style.transform = 'scale(1)';
+            });
+
+            // Highlight new active card
+            const activeCard = stateNodes[currentSandboxState];
+            if (activeCard) {
+                activeCard.style.transform = 'scale(1.02)';
+                if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) {
+                    activeCard.classList.add('border-brandBlue', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) {
+                    activeCard.classList.add('border-brandAmber', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.POST_FULFILLMENT) {
+                    activeCard.classList.add('border-brandBlue', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.REJECTION_RECONCILIATION) {
+                    activeCard.classList.add('border-brandViolet', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.DISPUTE_TRIAGE) {
+                    activeCard.classList.add('border-brandRose', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.AUTO_CANCELLED) {
+                    activeCard.classList.add('border-brandRose', 'bg-slate-900/40');
+                } else if (currentSandboxState === LIFECYCLE_STATES.SETTLED) {
+                    if (triggerActionName === 'PAYMENT_COOLING_ACTIVE') {
+                        activeCard.classList.add('border-brandAmber', 'bg-slate-900/40');
+                    } else {
+                        activeCard.classList.add('border-brandEmerald', 'bg-slate-900/40');
+                    }
+                }
+            }
+
+            // Adjust interactive button permissions
+            Object.values(eventButtons).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            // Dynamic text defaults
+            document.getElementById('lbl-scen-approve').innerText = "Buyer Approves Release";
+            document.getElementById('desc-scen-approve').innerText = "Bypasses inspection constraints.";
+            document.getElementById('lbl-scen-reject').innerText = "Buyer Rejects Delivery";
+            document.getElementById('desc-scen-reject').innerText = "Triggers TR_REJECTION window.";
+
+            if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) {
+                eventButtons.deposit.disabled = false;
+                eventButtons.deposit.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) {
+                eventButtons.courier.disabled = false;
+                eventButtons.courier.classList.remove('opacity-50', 'cursor-not-allowed');
+                eventButtons.timeout.disabled = false;
+                eventButtons.timeout.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentSandboxState === LIFECYCLE_STATES.POST_FULFILLMENT) {
+                eventButtons.approve.disabled = false;
+                eventButtons.approve.classList.remove('opacity-50', 'cursor-not-allowed');
+                eventButtons.reject.disabled = false;
+                eventButtons.reject.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentSandboxState === LIFECYCLE_STATES.REJECTION_RECONCILIATION) {
+                eventButtons.recAccept.disabled = false;
+                eventButtons.recAccept.classList.remove('opacity-50', 'cursor-not-allowed');
+                eventButtons.recEscalate.disabled = false;
+                eventButtons.recEscalate.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                if (extensionsLoggedCount < 2) {
+                    eventButtons.recExtend.disabled = false;
+                    eventButtons.recExtend.classList.remove('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('lbl-scen-extend').innerText = "Extend Reconcile Limit";
+                } else {
+                    document.getElementById('lbl-scen-extend').innerText = "Max Extensions Used";
+                }
+            } else if (currentSandboxState === LIFECYCLE_STATES.DISPUTE_TRIAGE) {
+                eventButtons.disputeResolve.disabled = false;
+                eventButtons.disputeResolve.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else if (currentSandboxState === LIFECYCLE_STATES.SETTLED && triggerActionName === 'PAYMENT_COOLING_ACTIVE') {
+                // Allows direct approval overrides or early dispute intercepts
+                eventButtons.approve.disabled = false;
+                eventButtons.approve.classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('lbl-scen-approve').innerText = "Force Direct Release";
+                document.getElementById('desc-scen-approve').innerText = "Bypasses cooling countdown instantly.";
+
+                eventButtons.reject.disabled = false;
+                eventButtons.reject.classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('lbl-scen-reject').innerText = "Intercept & Dispute";
+                document.getElementById('desc-scen-reject').innerText = "Freeze pending ledger during cooling.";
+            }
+
+            addSandboxLog(`State transitioned: [${currentSandboxState}] (Trigger: ${triggerActionName})`, 'success');
+            updateOutboundPayloadJson();
+        }
+
+        // Copy Callback Handler
+        document.getElementById('btn-copy-sandbox-payload').addEventListener('click', () => {
+            const code = document.getElementById('sandbox-payload-content').innerText;
+            const el = document.createElement('textarea');
+            el.value = code;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            triggerToast("Payload Copied", "Simulated JSON output copied to clipboard.", "📋");
+        });
+
+        // Dynamic State Machine callback JSON generator
+        function updateOutboundPayloadJson() {
+            const outBox = document.getElementById('sandbox-payload-content');
+            let resolutionType = "MAPPED_OUTFLOW";
+            
+            if (currentSandboxState === LIFECYCLE_STATES.AUTO_CANCELLED) resolutionType = "REVERT_PAYBACK_CLEAR";
+            if (currentSandboxState === LIFECYCLE_STATES.SETTLED) resolutionType = "ESCROW_WALLET_CREDITED";
+
+            const data = {
+                timestamp_epoch: Date.now(),
+                state_transition_code: currentSandboxState,
+                contract_ref: "tx_nexa_78a1",
+                amount_fiat: sandboxTargetAmt,
+                parent_category_applied: categoryAssignedName,
+                routing_configurations: {
+                    ledger_destination: "PROPRIETARY_ESCROW_WALLET",
+                    outflow_target: "merch_node_99a1",
+                    lien_unlocked: (currentSandboxState === LIFECYCLE_STATES.SETTLED && sandboxTimeLeft <= 0)
+                },
+                metadata: {
+                    dispute_extension_events: extensionsLoggedCount,
+                    state_checksum_hash: "sha256_" + Math.floor(Math.random() * 900000).toString(16)
+                },
+                api_callback_resolution: resolutionType
+            };
+            outBox.innerText = JSON.stringify(data, null, 2);
+        }
+
+        // INTERVAL AND TIMING CLEARERS
+        function clearSandboxTimers() {
+            if (activeSandboxTimer) {
+                clearInterval(activeSandboxTimer);
+                activeSandboxTimer = null;
+            }
+            sandboxTimeLeft = 0;
+            countdowns.delivery.innerText = '-';
+            countdowns.inspection.innerText = '-';
+            countdowns.rejection.innerText = '-';
+            countdowns.payment.innerText = '-';
+            countdowns.payment.classList.add('hidden');
+            
+            Object.values(timerBadges).forEach(el => el.classList.add('hidden'));
+        }
+
+        // ACTION TRIGER: INITIALIZE CONTRACT
+        document.getElementById('btn-initialize-escrow').addEventListener('click', () => {
+            clearSandboxTimers();
+            extensionsLoggedCount = 0;
+            
+            // Sync form configurations
+            sandboxTargetName = dealNameInput.value;
+            sandboxTargetAmt = parseFloat(dealAmountInput.value) || 2500;
+            categoryAssignedName = mappedConfigResult.resolvedLabel;
+            sandboxPaymentDelay = parseInt(payoutDelaySelect.value);
+
+            document.getElementById('scen-disp-amount').innerText = `$${sandboxTargetAmt.toFixed(2)}`;
+            
+            selectTab('sandbox');
+            updateSandboxState(LIFECYCLE_STATES.INITIALIZATION, 'API_INITIALIZATION_SUCCESS');
+            addSandboxLog(`Contract registered! Mapped Category: ${categoryAssignedName}`, 'api');
+        });
+
+        // 1. BUYER CLEAR DEPOSIT Webhook
+        eventButtons.deposit.addEventListener('click', () => {
+            clearSandboxTimers();
+            updateSandboxState(LIFECYCLE_STATES.PRE_FULFILLMENT, 'BUYER_DEPOSIT_CLEARED_WEBHOOK');
+            addSandboxLog("Ledger command: lock_funds_nodal applied.", 'system');
+
+            // Set Delivery timer
+            sandboxTimeLeft = mappedConfigResult.tr_delivery;
+            timerBadges.delivery.classList.remove('hidden');
+            addSandboxLog(`TR_DELIVERY countdown initiated (${sandboxTimeLeft}s)`, 'timer');
+
+            activeSandboxTimer = setInterval(() => {
+                sandboxTimeLeft--;
+                countdowns.delivery.innerText = `${sandboxTimeLeft}s remaining`;
+                if (sandboxTimeLeft <= 0) {
+                    clearSandboxTimers();
+                    addSandboxLog("Timer Limit Exceeded: TR_DELIVERY timeout reached.", 'error');
+                    executeSimulatorCancellation();
+                }
+            }, 1000);
+        });
+
+        // 2. LOGISTICS HANDSHAKE OTP Webhook
+        eventButtons.courier.addEventListener('click', () => {
+            clearSandboxTimers();
+            updateSandboxState(LIFECYCLE_STATES.POST_FULFILLMENT, 'LOGISTICS_DELIVERY_CONFIRMED');
+
+            // Set Inspection timer
+            sandboxTimeLeft = mappedConfigResult.tr_inspection;
+            timerBadges.inspection.classList.remove('hidden');
+            addSandboxLog(`TR_INSPECTION countdown initiated (${sandboxTimeLeft}s)`, 'timer');
+
+            activeSandboxTimer = setInterval(() => {
+                sandboxTimeLeft--;
+                countdowns.inspection.innerText = `${sandboxTimeLeft}s remaining`;
+                if (sandboxTimeLeft <= 0) {
+                    clearSandboxTimers();
+                    addSandboxLog("Inspection window closed silently. Defaulting to payout routing.", 'timer');
+                    executeSimulatorSettlement();
+                }
+            }, 1000);
+        });
+
+        // 3. FORCE DELIVERY TIMEOUT Webhook
+        eventButtons.timeout.addEventListener('click', () => {
+            clearSandboxTimers();
+            addSandboxLog("Developer action: Trigger Timeout Forced Revert.", 'error');
+            executeSimulatorCancellation();
+        });
+
+        // 4. BUYER EXPLICIT APPROVE release
+        eventButtons.approve.addEventListener('click', () => {
+            if (currentSandboxState === LIFECYCLE_STATES.SETTLED) {
+                addSandboxLog("Buyer bypasses pending hold: Forcing direct clearing.", 'api');
+                finalizeSimulatorSettlement();
+            } else {
+                clearSandboxTimers();
+                addSandboxLog("Buyer approved verification checklist.", 'success');
+                executeSimulatorSettlement();
+            }
+        });
+
+        // 5. BUYER EXPLICIT REJECTION
+        eventButtons.reject.addEventListener('click', () => {
+            if (currentSandboxState === LIFECYCLE_STATES.SETTLED) {
+                // Intercept pending cooling loop to trigger late dispute
+                clearSandboxTimers();
+                addSandboxLog("Conflict registered! Intercepted active payment delay countdown.", 'error');
+                updateSandboxState(LIFECYCLE_STATES.DISPUTE_TRIAGE, 'LATE_STAGE_DISPUTE_INTERCEPT');
+            } else {
+                // Inspection rejection transitions to the state 04 reconciliation sandbox
+                clearSandboxTimers();
+                updateSandboxState(LIFECYCLE_STATES.REJECTION_RECONCILIATION, 'BUYER_REJECTION_INITIALIZED');
+
+                // Trigger Rejection countdown
+                sandboxTimeLeft = mappedConfigResult.tr_rejection;
+                timerBadges.rejection.classList.remove('hidden');
+                addSandboxLog(`TR_REJECTION countdown initiated (${sandboxTimeLeft}s)`, 'timer');
+
+                activeSandboxTimer = setInterval(() => {
+                    sandboxTimeLeft--;
+                    countdowns.rejection.innerText = `${sandboxTimeLeft}s remaining`;
+                    if (sandboxTimeLeft <= 0) {
+                        clearSandboxTimers();
+                        addSandboxLog("TR_REJECTION timeout reached without resolutions. Auto-escalating.", 'error');
+                        updateSandboxState(LIFECYCLE_STATES.DISPUTE_TRIAGE, 'REJECTION_TIMER_EXPIRED');
+                    }
+                }, 1000);
+            }
+        });
+
+        // 6. RECONCILIATION CHANNELS: Accept offer
+        eventButtons.recAccept.addEventListener('click', () => {
+            clearSandboxTimers();
+            addSandboxLog("Counterparties agreed on settlement offer.", 'reconcile');
+            executeSimulatorSettlement();
+        });
+
+        // 7. RECONCILIATION CHANNELS: Extend timer
+        eventButtons.recExtend.addEventListener('click', () => {
+            if (extensionsLoggedCount < 2) {
+                extensionsLoggedCount++;
+                sandboxTimeLeft += 5; // Simulates extending window limits
+                addSandboxLog(`Buyer policy extension: Added +5s to clock limit (Extensions: ${extensionsLoggedCount}/2)`, 'reconcile');
+                countdowns.rejection.innerText = `${sandboxTimeLeft}s remaining`;
+                
+                if (extensionsLoggedCount >= 2) {
+                    eventButtons.recExtend.disabled = true;
+                    eventButtons.recExtend.classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('lbl-scen-extend').innerText = "Max Extensions Used";
+                }
+                updateOutboundPayloadJson();
+            }
+        });
+
+        // 8. RECONCILIATION CHANNELS: Escalate
+        eventButtons.recEscalate.addEventListener('click', () => {
+            clearSandboxTimers();
+            addSandboxLog("Negotiation stalled. Escalating directly to formal dispute.", 'error');
+            updateSandboxState(LIFECYCLE_STATES.DISPUTE_TRIAGE, 'BUYER_REJECTED_RESOLUTION_COMMUNICATIONS');
+        });
+
+        // 9. RESOLVE DISPUTE Arbitrated Resolution
+        eventButtons.disputeResolve.addEventListener('click', () => {
+            clearSandboxTimers();
+            addSandboxLog("Arbitrator issued final legal determination.", 'success');
+            executeSimulatorSettlement();
+        });
+
+        // PROCESS CONTROLLERS
+        function executeSimulatorCancellation() {
+            clearSandboxTimers();
+            updateSandboxState(LIFECYCLE_STATES.AUTO_CANCELLED, 'REVERT_100_PERCENT_TO_BUYER');
+            addSandboxLog("Settlement payload executed. Trust reverted to customer ledger.", 'success');
+        }
+
+        function executeSimulatorSettlement() {
+            clearSandboxTimers();
+            
+            if (sandboxPaymentDelay > 0) {
+                addSandboxLog(`TR_PAYMENT cooling countdown activated (${sandboxPaymentDelay}s delay)`, 'timer');
+                updateSandboxState(LIFECYCLE_STATES.SETTLED, 'PAYMENT_COOLING_ACTIVE');
+
+                // Adjust Settled UI node parameters for cooling countdown visual indication
+                document.getElementById('settled-scen-badge').innerText = "COOLING HOLD";
+                document.getElementById('settled-scen-badge').className = "text-[9px] bg-brandAmber/20 text-brandAmber border border-brandAmber/30 px-1.5 py-0.5 rounded font-mono font-semibold";
+                document.getElementById('settled-scen-title').innerText = "RELEASE PENDING";
+                document.getElementById('settled-scen-desc').innerText = "Lien hold active. Awaiting cooling countdown to clear.";
+                document.getElementById('settled-scen-status').innerText = "RELEASING TO WALLET...";
+                document.getElementById('settled-scen-status').className = "text-brandAmber font-bold animate-pulse uppercase";
+
+                countdowns.payment.classList.remove('hidden');
+                sandboxTimeLeft = sandboxPaymentDelay;
+                countdowns.payment.innerText = `${sandboxTimeLeft}s`;
+
+                activeSandboxTimer = setInterval(() => {
+                    sandboxTimeLeft--;
+                    countdowns.payment.innerText = `${sandboxTimeLeft}s remaining`;
+                    if (sandboxTimeLeft <= 0) {
+                        finalizeSimulatorSettlement();
+                    }
+                }, 1000);
+            } else {
+                addSandboxLog("TR_PAYMENT delay omitted (0s configuration). Instant settlement.", 'timer');
+                finalizeSimulatorSettlement();
+            }
+        }
+
+        function finalizeSimulatorSettlement() {
+            clearSandboxTimers();
+            addSandboxLog("Ledger payment cleared.", 'success');
+            
+            // Restore Settled node UI values
+            document.getElementById('settled-scen-badge').innerText = "SETTLED IN WALLET";
+            document.getElementById('settled-scen-badge').className = "text-[9px] bg-brandEmerald/20 text-brandEmerald border border-brandEmerald/30 px-1.5 py-0.5 rounded font-mono font-semibold";
+            document.getElementById('settled-scen-title').innerText = "PROPRIETARY ESCROW WALLET";
+            document.getElementById('settled-scen-desc').innerText = "Funds successfully cleared to verified merchant node.";
+            document.getElementById('settled-scen-status').innerText = "LEDGER UNLOCKED";
+            document.getElementById('settled-scen-status').className = "text-brandEmerald font-bold tracking-wider uppercase";
+
+            updateSandboxState(LIFECYCLE_STATES.SETTLED, 'FUNDS_RELEASED_TO_ESCROW_WALLET');
+        }
+
+        // INTEGRATED SCENARIO AUTO-RUN PATHS
+        
+        // Scenario A: Happy path
+        document.getElementById('scen-btn-happy').addEventListener('click', () => {
+            triggerToast("Running Scenario A", "Automated sequence: Happy path initialized.", "🟢");
+            clearSandboxTimers();
+            extensionsLoggedCount = 0;
+            sandboxPaymentDelay = 5;
+            
+            updateSandboxState(LIFECYCLE_STATES.INITIALIZATION, 'SCENARIO_HAPPY_START');
+            
+            // Sequence of automated triggers
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) eventButtons.deposit.click(); }, 1200);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) eventButtons.courier.click(); }, 2800);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.POST_FULFILLMENT) eventButtons.approve.click(); }, 4500);
+        });
+
+        // Scenario B: Delivery timeout
+        document.getElementById('scen-btn-del-timeout').addEventListener('click', () => {
+            triggerToast("Running Scenario B", "Automated sequence: Delivery failure tracking.", "🔴");
+            clearSandboxTimers();
+            extensionsLoggedCount = 0;
+            
+            updateSandboxState(LIFECYCLE_STATES.INITIALIZATION, 'SCENARIO_TIMEOUT_START');
+            
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) eventButtons.deposit.click(); }, 1200);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) eventButtons.timeout.click(); }, 3500);
+        });
+
+        // Scenario C: Rejection reconciliation
+        document.getElementById('scen-btn-reconcile').addEventListener('click', () => {
+            triggerToast("Running Scenario C", "Automated sequence: Rejection & Extension.", "🟣");
+            clearSandboxTimers();
+            extensionsLoggedCount = 0;
+            
+            updateSandboxState(LIFECYCLE_STATES.INITIALIZATION, 'SCENARIO_RECONCILE_START');
+            
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) eventButtons.deposit.click(); }, 1000);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) eventButtons.courier.click(); }, 2200);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.POST_FULFILLMENT) eventButtons.reject.click(); }, 3500);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.REJECTION_RECONCILIATION) eventButtons.recExtend.click(); }, 5000);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.REJECTION_RECONCILIATION) eventButtons.recAccept.click(); }, 6800);
+        });
+
+        // Scenario D: Cooling Period Dispute Intercept
+        document.getElementById('scen-btn-cooling-dispute').addEventListener('click', () => {
+            triggerToast("Running Scenario D", "Automated sequence: Cooling hold dispute.", "🟡");
+            clearSandboxTimers();
+            extensionsLoggedCount = 0;
+            sandboxPaymentDelay = 12; // Longer hold to permit easier manual click
+            payoutDelaySelect.value = "12";
+            
+            updateSandboxState(LIFECYCLE_STATES.INITIALIZATION, 'SCENARIO_INTERCEPT_START');
+            
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.INITIALIZATION) eventButtons.deposit.click(); }, 1000);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.PRE_FULFILLMENT) eventButtons.courier.click(); }, 2200);
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.POST_FULFILLMENT) eventButtons.approve.click(); }, 3500);
+            // Wait 2.5 seconds during the 12s cooling loop to automatically trigger dispute override
+            setTimeout(() => { if (currentSandboxState === LIFECYCLE_STATES.SETTLED) eventButtons.reject.click(); }, 6000);
+        });
+
+        // Window load initialization default logs
+        window.onload = function() {
+            addSandboxLog("Sandbox system ready. Node registers established.", 'system');
+            addSandboxLog("Config standard headers: Bearer tokens loaded.", 'system');
+        }
+    </script>
+</body>
+</html>
